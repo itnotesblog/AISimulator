@@ -2,3 +2,6 @@
 
 BotAI::~BotAI() {
 }
+
+void BotAI::reset() {
+}

@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     bot.cpp \
     easyrandomai.cpp \
     smartrandomai.cpp \
-    singlememrandomai.cpp
+    singlememrandomai.cpp \
+    accumulatingrandomai.cpp
 
 HEADERS  += aisimulatorview.h \
     aimodel.h \
@@ -27,6 +28,7 @@ HEADERS  += aisimulatorview.h \
     bot.h \
     easyrandomai.h \
     smartrandomai.h \
-    singlememrandomai.h
+    singlememrandomai.h \
+    accumulatingrandomai.h
 
 QMAKE_CXXFLAGS += -std=c++11

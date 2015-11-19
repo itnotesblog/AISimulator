@@ -24,7 +24,13 @@ MainWidget::MainWidget( QWidget* parent ) :
     QWidget( parent ), m_view( new AISimulatorView( &m_model ) ), m_aiCmb( nullptr ) {
 
     if( QVBoxLayout* mainLayout = new QVBoxLayout ) {
-        mainLayout->addWidget( m_view );
+        if( QHBoxLayout* l = new QHBoxLayout ) {
+            l->setMargin( 0 );
+            l->addStretch( 1 );
+            l->addWidget( m_view );
+            l->addStretch( 1 );
+            mainLayout->addLayout( l );
+        }
         if( QHBoxLayout* panelLayout = new QHBoxLayout ) {
             panelLayout->setMargin( 0 );
             if( QPushButton* resetBtn = new QPushButton( "Reset" ) ) {
@@ -47,6 +53,9 @@ MainWidget::MainWidget( QWidget* parent ) :
 
 void MainWidget::onReset() {
     m_model.reset();
+    for( auto ai : m_ais ) {
+        ai->reset();
+    }
 }
 
 void MainWidget::registerAI( const QString& name, BotAI* ai ) {
