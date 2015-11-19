@@ -1,8 +1,9 @@
 #include "aisimulatorview.h"
 
 #include <QPainter>
-
-#include "easyrandomai.h"
+#include <QLayout>
+#include <QPushButton>
+#include <QComboBox>
 
 static const bool DEBUG = true;
 static const int PIXELS_IN_MODEL_POINT = 2;
@@ -19,13 +20,59 @@ static const QColor BACKGROUND_COLOR = Qt::black;
 static const QColor DEBUG_GRID_COLOR = QColor( 70, 70, 70 );
 
 // ********************************************************************************
-AISimulatorView::AISimulatorView( QWidget* parent )
-    : QWidget( parent ) {
-    m_width = modelPointsToPixels( AIModel::blocksToPoints( m_model.getWidth() ) );
-    m_height = modelPointsToPixels( AIModel::blocksToPoints( m_model.getHeight() ) );
-    resize( m_width, m_height );
+MainWidget::MainWidget( QWidget* parent ) :
+    QWidget( parent ), m_view( new AISimulatorView( &m_model ) ), m_aiCmb( nullptr ) {
 
-    m_model.setAI( new EasyRandomAI );
+    if( QVBoxLayout* mainLayout = new QVBoxLayout ) {
+        mainLayout->addWidget( m_view );
+        if( QHBoxLayout* panelLayout = new QHBoxLayout ) {
+            panelLayout->setMargin( 0 );
+            if( QPushButton* resetBtn = new QPushButton( "Reset" ) ) {
+                panelLayout->addWidget( resetBtn );
+                connect( resetBtn, SIGNAL( clicked() ), SLOT( onReset() ) );
+            }
+            panelLayout->addStretch( 1 );
+            if( ( m_aiCmb = new QComboBox ) ) {
+                panelLayout->addWidget( m_aiCmb );
+                connect( m_aiCmb, SIGNAL( currentIndexChanged( int ) ), SLOT( onAIChanged( int ) ) );
+            }
+            mainLayout->addLayout( panelLayout );
+        }
+
+        setLayout( mainLayout );
+    }
+
+    onAIChanged( 0 );
+}
+
+void MainWidget::onReset() {
+    m_model.reset();
+}
+
+void MainWidget::registerAI( const QString& name, BotAI* ai ) {
+    if( m_aiCmb ) {
+        m_aiCmb->addItem( name );
+        m_ais.push_back( std::shared_ptr< BotAI >( ai ) );
+    }
+
+    if( m_ais.size() == 1 ) {
+        onAIChanged( 0 );
+    }
+}
+
+void MainWidget::onAIChanged( int i ) {
+    if( 0 <= i && static_cast< size_t >( i ) < m_ais.size() ) {
+        m_model.setAI( m_ais[ i ] );
+    }
+}
+
+// ********************************************************************************
+AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
+    QWidget( parent ), m_model( model ) {
+
+    m_width = modelPointsToPixels( AIModel::blocksToPoints( m_model->getWidth() ) );
+    m_height = modelPointsToPixels( AIModel::blocksToPoints( m_model->getHeight() ) );
+    setMinimumSize( m_width, m_height );
 
     connect( &m_timer, SIGNAL( timeout() ), SLOT( onTimeOut() ) );
     m_timer.start( STEP_TIME_INTERVAL );
@@ -48,19 +95,19 @@ void AISimulatorView::paintEvent( QPaintEvent* ) {
         }
     }
 
-    for( int x = 0; x < m_model.getWidth(); ++x ) {
-        for( int y = 0; y < m_model.getHeight(); ++y ) {
+    for( int x = 0; x < m_model->getWidth(); ++x ) {
+        for( int y = 0; y < m_model->getHeight(); ++y ) {
             drawBlock(
                 AIModel::blocksToPoints( x ) + AIModel::HALF_BLOCK_SIZE,
                 AIModel::blocksToPoints( y ) + AIModel::HALF_BLOCK_SIZE,
                 AIModel::BLOCK_SIZE,
-                m_model.getBlockType( x, y ),
+                m_model->getBlockType( x, y ),
                 &painter
             );
         }
     }
 
-    for( const std::unique_ptr< Bot >& b : m_model.getBots() ) {
+    for( const std::unique_ptr< Bot >& b : m_model->getBots() ) {
         drawBlock( b->getX(), b->getY(), b->getSize(), 2, &painter );
     }
 }
@@ -89,6 +136,6 @@ void AISimulatorView::drawBlock( int xPoints, int yPoints, int sizePoints, int t
 }
 
 void AISimulatorView::onTimeOut() {
-    m_model.doStep();
+    m_model->doStep();
     repaint();
 }

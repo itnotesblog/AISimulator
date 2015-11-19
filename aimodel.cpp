@@ -15,8 +15,8 @@ int AIModel::getHeight() const {
     return m_field.size();
 }
 
-void AIModel::setAI( BotAI* ai ) {
-    m_ai.reset( ai );
+void AIModel::setAI( const std::shared_ptr< BotAI >& ai ) {
+    m_ai = ai;
 }
 
 void AIModel::reset() {

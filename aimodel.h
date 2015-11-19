@@ -23,14 +23,14 @@ public:
     int getWidth() const;
     int getHeight() const;
 
-    void setAI( BotAI* ai );
+    void setAI( const std::shared_ptr< BotAI >& ai );
 
     void reset();
     void doStep();
 
     int getBlockType( int x, int y ) const;
 
-    const std::set< std::unique_ptr<Bot> >& getBots() const;
+    const std::set< std::unique_ptr< Bot > >& getBots() const;
 
     bool hasCollisions( const Bot& bot );
 
@@ -38,7 +38,7 @@ private:
     static std::unique_ptr< Bot > makeBot( int x, int y );
 
 private:
-    std::unique_ptr< BotAI > m_ai;
+    std::shared_ptr< BotAI > m_ai;
 
     Matrix m_field;
 
