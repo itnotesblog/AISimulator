@@ -32,7 +32,8 @@ public:
 
     const std::set< std::unique_ptr< Bot > >& getBots() const;
 
-    bool hasCollisions( const Bot& bot );
+    bool hasCollisions( const Bot& bot ) const;
+    std::vector< Bot::Direction > findValidDirections( const Bot& bot ) const;
 
 private:
     static std::unique_ptr< Bot > makeBot( int x, int y );

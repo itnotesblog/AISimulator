@@ -17,12 +17,14 @@ SOURCES += main.cpp\
     aimodel.cpp \
     botai.cpp \
     bot.cpp \
-    easyrandomai.cpp
+    easyrandomai.cpp \
+    smartrandomai.cpp
 
 HEADERS  += aisimulatorview.h \
     aimodel.h \
     botai.h \
     bot.h \
-    easyrandomai.h
+    easyrandomai.h \
+    smartrandomai.h
 
 QMAKE_CXXFLAGS += -std=c++11

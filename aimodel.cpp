@@ -58,10 +58,10 @@ void AIModel::doStep() {
             continue;
         }
 
-        b->move( b->getDirection(), b->getSpeed() );
+        b->move();
 
         while( hasCollisions( *b ) ) {
-            b->move( b->getDirection(), -1 );
+            b->move( -1 );
         }
     }
 }
@@ -81,7 +81,7 @@ const std::set< std::unique_ptr< Bot > >& AIModel::getBots() const {
     return m_bots;
 }
 
-bool AIModel::hasCollisions( const Bot& bot ) {
+bool AIModel::hasCollisions( const Bot& bot ) const {
     const int halfBotSize = bot.getSize() / 2;
 
     if( bot.getX() - halfBotSize < 0 || bot.getY() - halfBotSize < 0 ) {
@@ -108,4 +108,19 @@ bool AIModel::hasCollisions( const Bot& bot ) {
     }
 
     return false;
+}
+
+std::vector< Bot::Direction > AIModel::findValidDirections( const Bot& bot ) const {
+    std::vector< Bot::Direction > directions;
+    for( int i = 0; i < Bot::DIRECTION_COUNT; ++i ) {
+        Bot botCopy = bot;
+        Bot::Direction d = Bot::Direction( i );
+        botCopy.setDirection( d );
+        botCopy.move( 1 );
+        if( !hasCollisions( botCopy ) ) {
+            directions.push_back( d  );
+        }
+    }
+
+    return directions;
 }

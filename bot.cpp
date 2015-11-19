@@ -24,8 +24,12 @@ void Bot::setY( int y ) {
     m_y = y;
 }
 
-void Bot::move( Direction direction, int distance ) {
-    switch( direction ) {
+void Bot::move() {
+    move( getSpeed() );
+}
+
+void Bot::move( int distance ) {
+    switch( m_direction ) {
     case Bot::LEFT:
         m_x -= distance;
         break;

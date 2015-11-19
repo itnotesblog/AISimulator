@@ -26,7 +26,8 @@ public:
     int getY() const;
     void setY( int y );
 
-    void move( Direction direction, int distance );
+    void move();
+    void move( int distance );
 
     int getSize() const;
 
