@@ -23,6 +23,7 @@ void SmartSingleMemRandomAI::doStep( const AIModel& model, Bot* bot ) {
     if( std::find( directions.begin(), directions.end(), bot->getDirection() ) != directions.end() ) {
         openedDirections << bot->getDirection();
     } else {
+        openedDirections.clear();
         for( Bot::Direction d : directions ) {
             openedDirections << d;
         }
