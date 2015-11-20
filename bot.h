@@ -12,6 +12,16 @@ public:
         DIRECTION_COUNT
     };
 
+    static Direction reverseDirection( Direction direction ) {
+        switch( direction ) {
+        case LEFT: return RIGHT;
+        case RIGHT: return LEFT;
+        case UP: return DOWN;
+        case DOWN: return UP;
+        default: return LEFT;
+        }
+    }
+
     static const int DEFAULT_SPEED = 2;
     static const int DEFAULT_SIZE = 12;
 
