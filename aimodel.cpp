@@ -44,8 +44,8 @@ void AIModel::reset() {
     m_bots.insert( makeBot( 54, 50 ) );
 }
 
-std::unique_ptr< Bot > AIModel::makeBot( int x, int y ) {
-    return std::unique_ptr< Bot >( new Bot( x, y ) );
+std::unique_ptr< Bot > AIModel::makeBot( int x, int y, int type ) {
+    return std::unique_ptr< Bot >( new Bot( x, y, type ) );
 }
 
 void AIModel::doStep() {

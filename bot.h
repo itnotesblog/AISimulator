@@ -26,9 +26,11 @@ public:
     static const int DEFAULT_SIZE = 12;
 
 public:
-    Bot( int x, int y, int size = DEFAULT_SIZE, int speed = DEFAULT_SPEED );
+    Bot( int x, int y, int type, int size = DEFAULT_SIZE, int speed = DEFAULT_SPEED );
 
     int getID() const;
+
+    int getType() const;
 
     int getX() const;
     void setX( int x );
@@ -55,6 +57,8 @@ private:
 
 private:
     int m_id;
+
+    int m_type;
 
     int m_x;
     int m_y;

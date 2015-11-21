@@ -15,7 +15,9 @@ class AIModel {
 public:
     static const int BLOCK_SIZE = 12;
     static const int HALF_BLOCK_SIZE = BLOCK_SIZE / 2;
-    static int blocksToPoints( int x ) { return x * BLOCK_SIZE; }
+    static int blocksToPoints( int x ) {
+        return x * BLOCK_SIZE;
+    }
 
 public:
     AIModel();
@@ -36,7 +38,7 @@ public:
     std::vector< Bot::Direction > findValidDirections( const Bot& bot ) const;
 
 private:
-    static std::unique_ptr< Bot > makeBot( int x, int y );
+    static std::unique_ptr< Bot > makeBot( int x, int y , int type = 2 );
 
 private:
     std::shared_ptr< BotAI > m_ai;

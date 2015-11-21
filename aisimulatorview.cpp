@@ -117,7 +117,7 @@ void AISimulatorView::paintEvent( QPaintEvent* ) {
     }
 
     for( const std::unique_ptr< Bot >& b : m_model->getBots() ) {
-        drawBlock( b->getX(), b->getY(), b->getSize(), 2, &painter );
+        drawBlock( b->getX(), b->getY(), b->getSize(), b->getType(), &painter );
     }
 }
 

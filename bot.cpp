@@ -1,11 +1,15 @@
 #include "bot.h"
 
-Bot::Bot( int x, int y , int size, int speed ) :
-    m_id( counter++ ), m_x( x ), m_y( y ), m_size( size ), m_direction( RIGHT ), m_moving( false ), m_speed( speed ) {
+Bot::Bot( int x, int y , int type, int size, int speed ) :
+    m_id( counter++ ), m_type( type ), m_x( x ), m_y( y ), m_size( size ), m_direction( RIGHT ), m_moving( false ), m_speed( speed ) {
 }
 
 int Bot::getID() const {
     return m_id;
+}
+
+int Bot::getType() const {
+    return m_type;
 }
 
 int Bot::getX() const {
