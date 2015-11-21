@@ -23,12 +23,12 @@ bool AIModel::addBot( int x, int y, int type ) {
     return addBot( makeBot( x, y, type ) );
 }
 
-bool AIModel::addBot( std::unique_ptr< Bot >&& bot ) {
+bool AIModel::addBot( const std::shared_ptr< Bot >& bot ) {
     if( hasCollisions( *bot ) ) {
         return false;
     }
 
-    m_bots.insert( std::move( bot ) );
+    m_bots.insertMulti( bot->getType(), bot );
     return true;
 }
 
@@ -57,12 +57,12 @@ void AIModel::reset() {
     addBot( 54, 50 );
 }
 
-std::unique_ptr< Bot > AIModel::makeBot( int x, int y, int type ) {
-    return std::unique_ptr< Bot >( new Bot( x, y, type ) );
+std::shared_ptr< Bot > AIModel::makeBot( int x, int y, int type ) {
+    return std::make_shared< Bot >( x, y, type );
 }
 
 void AIModel::doStep() {
-    for( const std::unique_ptr< Bot >& b : m_bots ) {
+    for( auto b : m_bots ) {
         if( m_aiMap.contains( b->getType() ) ) {
             m_aiMap[ b->getType() ]->doStep( *this, b.get() );
         }
@@ -90,8 +90,8 @@ int AIModel::getBlockType( int x, int y ) const {
     return m_field[ y ][ x ];
 }
 
-const std::set< std::unique_ptr< Bot > >& AIModel::getBots() const {
-    return m_bots;
+QList< std::shared_ptr< Bot > > AIModel::getBots() const {
+    return m_bots.values();
 }
 
 bool AIModel::hasCollisions( const Bot& bot ) const {

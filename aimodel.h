@@ -30,27 +30,27 @@ public:
     void setAI( const std::shared_ptr< BotAI >& ai, int botType );
 
     bool addBot( int x, int y, int type = 2 );
-    bool addBot( std::unique_ptr< Bot >&& bot );
+    bool addBot( const std::shared_ptr< Bot >& bot );
 
     void reset();
     void doStep();
 
     int getBlockType( int x, int y ) const;
 
-    const std::set< std::unique_ptr< Bot > >& getBots() const;
+    QList< std::shared_ptr< Bot > > getBots() const;
 
     bool hasCollisions( const Bot& bot ) const;
     std::vector< Bot::Direction > findValidDirections( const Bot& bot ) const;
 
 private:
-    static std::unique_ptr< Bot > makeBot( int x, int y , int type = 2 );
+    static std::shared_ptr< Bot > makeBot( int x, int y , int type = 2 );
 
 private:
     QHash< int, std::shared_ptr< BotAI > > m_aiMap;
 
     Matrix m_field;
 
-    std::set< std::unique_ptr< Bot > > m_bots;
+    QHash< int, std::shared_ptr< Bot > > m_bots;
 };
 
 #endif // AIMODEL_H
