@@ -1,6 +1,7 @@
 #include "aimodel.h"
 
 #include <QSet>
+#include <QQueue>
 
 #include "botai.h"
 #include "collisionresolver.h"
@@ -8,6 +9,10 @@
 template< typename T >
 uint qHash( const std::shared_ptr< T >& ptr ) {
     return qHash( ptr.get() );
+}
+
+uint qHash( const QPoint& point ) {
+    return qHash( static_cast < qint64 >( point.x() ) << 32 | point.y() );
 }
 
 AIModel::AIModel() {
@@ -79,15 +84,7 @@ void AIModel::doStep() {
             m_aiMap[ b->getType() ]->doStep( *this, b.get() );
         }
 
-        if( !b->isMoving() ) {
-            continue;
-        }
-
-        b->move();
-
-        while( hasCollisions( *b ) ) {
-            b->move( -1 );
-        }
+        *b = doMove( *b );
     }
 
     QSet< QPair< std::shared_ptr< Bot >, std::shared_ptr< Bot > > > resolved;
@@ -114,6 +111,17 @@ void AIModel::doStep() {
             }
         }
     }
+}
+
+Bot AIModel::doMove( const Bot& bot ) const {
+    Bot botCopy = bot;
+    botCopy.move();
+
+    while( hasCollisions( botCopy ) ) {
+        botCopy.move( -1 );
+    }
+
+    return botCopy;
 }
 
 int AIModel::getBlockType( int x, int y ) const {
@@ -177,4 +185,49 @@ std::vector< Bot::Direction > AIModel::findValidDirections( const Bot& bot ) con
     }
 
     return directions;
+}
+
+std::vector< Bot::Direction > AIModel::findPath( const Bot& bot, int x, int y ) const {
+    QSet< QPoint > visitedPoints;
+    visitedPoints << QPoint( bot.getX(), bot.getY() );
+
+    struct Node {
+        Node( const Bot& b, std::shared_ptr< Node > p = nullptr ) :
+            bot( b ), prev( p ) { }
+
+        Bot bot;
+        std::shared_ptr< Node > prev;
+    };
+
+    QQueue< std::shared_ptr< Node > > q;
+    q << std::make_shared< Node >( bot );
+
+    while( !q.isEmpty() ) {
+        std::shared_ptr< Node > node = q.dequeue();
+        for( int i = 0; i < Bot::DIRECTION_COUNT; ++i ) {
+            Bot::Direction d = Bot::Direction( i );
+            Bot bCopy = node->bot;
+            bCopy.setDirection( d );
+            bCopy.startMoving();
+            bCopy = doMove( bCopy );
+            QPoint p( bCopy.getX(), bCopy.getY() );
+            if( p.x() == x && p.y() == y ) {
+                std::vector< Bot::Direction > path;
+                path.push_back( d );
+                std::shared_ptr< Node > n = node;
+                while( n->prev ) {
+                    path.push_back( n->bot.getDirection() );
+                    n = n->prev;
+                }
+                std::reverse( path.begin(), path.end() );
+                return path;
+            }
+            if( !visitedPoints.contains( p ) ) {
+                visitedPoints << p;
+                q << std::make_shared< Node >( bCopy, node );
+            }
+        }
+    }
+
+    return std::vector< Bot::Direction >();
 }

@@ -47,8 +47,12 @@ public:
     bool hasCollisions( const Bot& bot ) const;
     std::vector< Bot::Direction > findValidDirections( const Bot& bot ) const;
 
+    std::vector< Bot::Direction > findPath( const Bot& bot, int x, int y ) const;
+
 private:
     static std::shared_ptr< Bot > makeBot( int x, int y , int type = 2 );
+
+    Bot doMove( const Bot& bot ) const;
 
 private:
     QHash< int, std::shared_ptr< BotAI > > m_aiMap;

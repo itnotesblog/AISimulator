@@ -33,6 +33,10 @@ void Bot::move() {
 }
 
 void Bot::move( int distance ) {
+    if( !isMoving() ) {
+        return;
+    }
+
     switch( m_direction ) {
     case Bot::LEFT:
         setX( getX() - distance );

@@ -35,10 +35,8 @@ public:
     int getType() const;
 
     int getX() const;
-    void setX( int x );
 
     int getY() const;
-    void setY( int y );
 
     void move();
     void move( int distance );
@@ -58,6 +56,10 @@ public:
 
     void die();
     bool isDead() const;
+
+private:
+    void setX( int x );
+    void setY( int y );
 
 private:
     static int counter;
