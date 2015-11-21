@@ -19,6 +19,19 @@ void AIModel::setAI( const std::shared_ptr< BotAI >& ai ) {
     m_ai = ai;
 }
 
+bool AIModel::addBot( int x, int y, int type ) {
+    return addBot( makeBot( x, y, type ) );
+}
+
+bool AIModel::addBot( std::unique_ptr< Bot >&& bot ) {
+    if( hasCollisions( *bot ) ) {
+        return false;
+    }
+
+    m_bots.insert( std::move( bot ) );
+    return true;
+}
+
 void AIModel::reset() {
     m_field = {
         { 0, 0, 1, 0, 0, 1, 0, 0, 0, 0 },
@@ -37,11 +50,11 @@ void AIModel::reset() {
     };
 
     m_bots.clear();
-    m_bots.insert( makeBot( 10, 10 ) );
-    m_bots.insert( makeBot( 10, 140 ) );
-    m_bots.insert( makeBot( 110, 10 ) );
-    m_bots.insert( makeBot( 110, 140 ) );
-    m_bots.insert( makeBot( 54, 50 ) );
+    addBot( 10, 10 );
+    addBot( 10, 140 );
+    addBot( 110, 10 );
+    addBot( 110, 140 );
+    addBot( 54, 50 );
 }
 
 std::unique_ptr< Bot > AIModel::makeBot( int x, int y, int type ) {
@@ -118,7 +131,7 @@ std::vector< Bot::Direction > AIModel::findValidDirections( const Bot& bot ) con
         botCopy.setDirection( d );
         botCopy.move( 1 );
         if( !hasCollisions( botCopy ) ) {
-            directions.push_back( d  );
+            directions.push_back( d );
         }
     }
 

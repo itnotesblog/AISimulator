@@ -27,6 +27,9 @@ public:
 
     void setAI( const std::shared_ptr< BotAI >& ai );
 
+    bool addBot( int x, int y, int type = 2 );
+    bool addBot( std::unique_ptr< Bot >&& bot );
+
     void reset();
     void doStep();
 
