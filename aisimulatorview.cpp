@@ -4,6 +4,7 @@
 #include <QLayout>
 #include <QPushButton>
 #include <QComboBox>
+#include <QMouseEvent>
 
 static const bool DEBUG = true;
 static const int PIXELS_IN_MODEL_POINT = 2;
@@ -146,5 +147,17 @@ void AISimulatorView::drawBlock( int xPoints, int yPoints, int sizePoints, int t
 
 void AISimulatorView::onTimeOut() {
     m_model->doStep();
+    repaint();
+}
+
+void AISimulatorView::mousePressEvent( QMouseEvent* e ) {
+    if( e->button() != Qt::LeftButton ) {
+        QWidget::mousePressEvent( e );
+        return;
+    }
+
+    int x = AIModel::blocksToPoints( e->pos().x() / PIXELS_IN_MODEL_POINT / AIModel::BLOCK_SIZE ) + AIModel::HALF_BLOCK_SIZE;
+    int y = AIModel::blocksToPoints( e->pos().y() / PIXELS_IN_MODEL_POINT / AIModel::BLOCK_SIZE ) + AIModel::HALF_BLOCK_SIZE;
+    m_model->addBot( x, y, 3 );
     repaint();
 }

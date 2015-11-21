@@ -42,6 +42,8 @@ protected:
     void paintEvent( QPaintEvent* );
     static void drawBlock( int xPoints, int yPoints, int sizePoints, int type, QPainter* painter );
 
+    void mousePressEvent( QMouseEvent* e );
+
 private slots:
     void onTimeOut();
 
