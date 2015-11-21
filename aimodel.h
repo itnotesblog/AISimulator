@@ -8,6 +8,8 @@
 #include "bot.h"
 #include "botai.h"
 
+#include <QHash>
+
 typedef std::vector< int > Row;
 typedef std::vector< Row > Matrix;
 
@@ -25,7 +27,7 @@ public:
     int getWidth() const;
     int getHeight() const;
 
-    void setAI( const std::shared_ptr< BotAI >& ai );
+    void setAI( const std::shared_ptr< BotAI >& ai, int botType );
 
     bool addBot( int x, int y, int type = 2 );
     bool addBot( std::unique_ptr< Bot >&& bot );
@@ -44,7 +46,7 @@ private:
     static std::unique_ptr< Bot > makeBot( int x, int y , int type = 2 );
 
 private:
-    std::shared_ptr< BotAI > m_ai;
+    QHash< int, std::shared_ptr< BotAI > > m_aiMap;
 
     Matrix m_field;
 

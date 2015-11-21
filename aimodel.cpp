@@ -15,8 +15,8 @@ int AIModel::getHeight() const {
     return m_field.size();
 }
 
-void AIModel::setAI( const std::shared_ptr< BotAI >& ai ) {
-    m_ai = ai;
+void AIModel::setAI( const std::shared_ptr< BotAI >& ai , int botType ) {
+    m_aiMap[ botType ] = ai;
 }
 
 bool AIModel::addBot( int x, int y, int type ) {
@@ -63,8 +63,8 @@ std::unique_ptr< Bot > AIModel::makeBot( int x, int y, int type ) {
 
 void AIModel::doStep() {
     for( const std::unique_ptr< Bot >& b : m_bots ) {
-        if( m_ai ) {
-            m_ai->doStep( *this, b.get() );
+        if( m_aiMap.contains( b->getType() ) ) {
+            m_aiMap[ b->getType() ]->doStep( *this, b.get() );
         }
 
         if( !b->isMoving() ) {

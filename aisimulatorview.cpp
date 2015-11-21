@@ -72,7 +72,7 @@ void MainWidget::registerAI( const QString& name, BotAI* ai ) {
 
 void MainWidget::onAIChanged( int i ) {
     if( 0 <= i && static_cast< size_t >( i ) < m_ais.size() ) {
-        m_model.setAI( m_ais[ i ] );
+        m_model.setAI( m_ais[ i ], 2 );
     }
 }
 
