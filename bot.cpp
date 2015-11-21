@@ -1,7 +1,7 @@
 #include "bot.h"
 
-Bot::Bot( int x, int y , int type, int size, int speed ) :
-    m_id( counter++ ), m_type( type ), m_x( x ), m_y( y ), m_size( size ), m_direction( RIGHT ), m_moving( false ), m_speed( speed ) {
+Bot::Bot( int x, int y, int type, int size, int speed ) :
+    m_id( counter++ ), m_type( type ), m_rect( x - size / 2 + 1, y - size / 2 + 1, size, size ), m_direction( RIGHT ), m_moving( false ), m_speed( speed ), m_dead( false ) {
 }
 
 int Bot::getID() const {
@@ -13,19 +13,19 @@ int Bot::getType() const {
 }
 
 int Bot::getX() const {
-    return m_x;
+    return m_rect.center().x();
 }
 
 void Bot::setX( int x ) {
-    m_x = x;
+    m_rect.moveCenter( QPoint( x, getY() ) );
 }
 
 int Bot::getY() const {
-    return m_y;
+    return m_rect.center().y();
 }
 
 void Bot::setY( int y ) {
-    m_y = y;
+    m_rect.moveCenter( QPoint( getX(), y ) );
 }
 
 void Bot::move() {
@@ -35,16 +35,16 @@ void Bot::move() {
 void Bot::move( int distance ) {
     switch( m_direction ) {
     case Bot::LEFT:
-        m_x -= distance;
+        setX( getX() - distance );
         break;
     case Bot::RIGHT:
-        m_x += distance;
+        setX( getX() + distance );
         break;
     case Bot::UP:
-        m_y -= distance;
+        setY( getY() - distance );
         break;
     case Bot::DOWN:
-        m_y += distance;
+        setY( getY() + distance );
         break;
     default:
         break;
@@ -52,7 +52,7 @@ void Bot::move( int distance ) {
 }
 
 int Bot::getSize() const {
-    return m_size;
+    return m_rect.size().width();
 }
 
 Bot::Direction Bot::getDirection() const {
@@ -77,6 +77,18 @@ void Bot::stopMoving() {
 
 int Bot::getSpeed() const {
     return m_speed;
+}
+
+bool Bot::hasCollisions( const Bot& other ) const {
+    return m_rect.intersects( other.m_rect );
+}
+
+void Bot::die() {
+    m_dead = true;
+}
+
+bool Bot::isDead() const {
+    return m_dead;
 }
 
 

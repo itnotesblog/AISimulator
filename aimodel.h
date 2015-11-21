@@ -5,10 +5,12 @@
 #include <set>
 #include <memory>
 
-#include "bot.h"
-#include "botai.h"
-
 #include <QHash>
+
+#include "bot.h"
+
+class BotAI;
+class CollisionResolver;
 
 typedef std::vector< int > Row;
 typedef std::vector< Row > Matrix;
@@ -29,6 +31,8 @@ public:
 
     void setAI( const std::shared_ptr< BotAI >& ai, int botType );
 
+    void setCollisionResolver( const std::shared_ptr< CollisionResolver >& resolver );
+
     bool addBot( int x, int y, int type = 2 );
     bool addBot( const std::shared_ptr< Bot >& bot );
 
@@ -38,6 +42,7 @@ public:
     int getBlockType( int x, int y ) const;
 
     QList< std::shared_ptr< Bot > > getBots() const;
+    QList< std::shared_ptr< Bot > > getBots( int botType ) const;
 
     bool hasCollisions( const Bot& bot ) const;
     std::vector< Bot::Direction > findValidDirections( const Bot& bot ) const;
@@ -51,6 +56,8 @@ private:
     Matrix m_field;
 
     QHash< int, std::shared_ptr< Bot > > m_bots;
+
+    std::shared_ptr< CollisionResolver > m_resolver;
 };
 
 #endif // AIMODEL_H

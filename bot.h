@@ -1,6 +1,8 @@
 #ifndef BOT_H
 #define BOT_H
 
+#include <QRect>
+
 class Bot {
 public:
     enum Direction {
@@ -52,6 +54,11 @@ public:
 
     int getSpeed() const;
 
+    bool hasCollisions( const Bot& other ) const;
+
+    void die();
+    bool isDead() const;
+
 private:
     static int counter;
 
@@ -60,16 +67,15 @@ private:
 
     int m_type;
 
-    int m_x;
-    int m_y;
-
-    int m_size;
+    QRect m_rect;
 
     Direction m_direction;
 
     bool m_moving;
 
     int m_speed;
+
+    bool m_dead;
 };
 
 #endif // BOT_H

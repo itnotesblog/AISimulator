@@ -6,6 +6,9 @@
 #include <QComboBox>
 #include <QMouseEvent>
 
+#include "botai.h"
+#include "collisionresolver.h"
+
 static const bool DEBUG = true;
 static const int PIXELS_IN_MODEL_POINT = 2;
 static const int STEP_TIME_INTERVAL = 33;
@@ -15,7 +18,6 @@ int modelPointsToPixels( int x ) {
 }
 
 static const int BLOCK_SIZE_PIXELS = modelPointsToPixels( AIModel::BLOCK_SIZE );
-static const int HALF_BLOCK_SIZE_PIXELS = BLOCK_SIZE_PIXELS / 2;
 
 static const QColor BACKGROUND_COLOR = Qt::black;
 static const QColor DEBUG_GRID_COLOR = QColor( 70, 70, 70 );
@@ -23,6 +25,8 @@ static const QColor DEBUG_GRID_COLOR = QColor( 70, 70, 70 );
 // ********************************************************************************
 MainWidget::MainWidget( QWidget* parent ) :
     QWidget( parent ), m_view( new AISimulatorView( &m_model ) ), m_aiCmb( nullptr ) {
+
+    m_model.setCollisionResolver( std::make_shared< CollisionResolver >() );
 
     if( QVBoxLayout* mainLayout = new QVBoxLayout ) {
         if( QHBoxLayout* l = new QHBoxLayout ) {

@@ -1,6 +1,14 @@
 #include "aimodel.h"
 
-#include <QDebug>
+#include <QSet>
+
+#include "botai.h"
+#include "collisionresolver.h"
+
+template< typename T >
+uint qHash( const std::shared_ptr< T >& ptr ) {
+    return qHash( ptr.get() );
+}
 
 AIModel::AIModel() {
     srand( time( 0 ) );
@@ -17,6 +25,10 @@ int AIModel::getHeight() const {
 
 void AIModel::setAI( const std::shared_ptr< BotAI >& ai , int botType ) {
     m_aiMap[ botType ] = ai;
+}
+
+void AIModel::setCollisionResolver( const std::shared_ptr< CollisionResolver >& resolver ) {
+    m_resolver = resolver;
 }
 
 bool AIModel::addBot( int x, int y, int type ) {
@@ -77,6 +89,31 @@ void AIModel::doStep() {
             b->move( -1 );
         }
     }
+
+    QSet< QPair< std::shared_ptr< Bot >, std::shared_ptr< Bot > > > resolved;
+    if( m_resolver ) {
+        for( auto b1 : m_bots ) {
+            for( auto b2 : m_bots ) {
+                auto pair = qMakePair( b1, b2 );
+                if( resolved.contains( pair ) ) {
+                    continue;
+                }
+                if( b1->hasCollisions( *b2 ) ) {
+                    m_resolver->resolve( *this, b1.get(), b2.get() );
+                    resolved << pair;
+                }
+            }
+        }
+
+        auto it = m_bots.begin();
+        while( it != m_bots.end() ) {
+            if( it.value()->isDead() ) {
+                it = m_bots.erase( it );
+            } else {
+                ++it;
+            }
+        }
+    }
 }
 
 int AIModel::getBlockType( int x, int y ) const {
@@ -92,6 +129,10 @@ int AIModel::getBlockType( int x, int y ) const {
 
 QList< std::shared_ptr< Bot > > AIModel::getBots() const {
     return m_bots.values();
+}
+
+QList< std::shared_ptr< Bot > > AIModel::getBots( int botType ) const {
+    return m_bots.values( botType );
 }
 
 bool AIModel::hasCollisions( const Bot& bot ) const {
