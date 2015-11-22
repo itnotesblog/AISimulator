@@ -43,6 +43,8 @@ public:
 
     int getSize() const;
 
+    int squareDistanceTo( const Bot& bot ) const;
+
     Direction getDirection() const;
     void setDirection( Direction value );
 

@@ -59,6 +59,12 @@ int Bot::getSize() const {
     return m_rect.size().width();
 }
 
+int Bot::squareDistanceTo( const Bot& bot ) const {
+    int dx = bot.getX() - getX();
+    int dy = bot.getY() - getY();
+    return dx * dx + dy * dy;
+}
+
 Bot::Direction Bot::getDirection() const {
     return m_direction;
 }

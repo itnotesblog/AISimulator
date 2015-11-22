@@ -7,6 +7,7 @@
 #include "accumulatingrandomai.h"
 #include "smartsinglememrandomai.h"
 #include "pathfinderai.h"
+#include "smartpathfinderai.h"
 
 int main( int argc, char* argv[] ) {
     QApplication a( argc, argv );
@@ -18,6 +19,7 @@ int main( int argc, char* argv[] ) {
     w.registerAI( "AccumulatingRandomAI", new AccumulatingRandomAI );
     w.registerAI( "SmartSingleMemRandomAI", new SmartSingleMemRandomAI );
     w.registerAI( "PathFinderAI", new PathFinderAI );
+    w.registerAI( "SmartPathFinderAI", new SmartPathFinderAI );
     w.show();
 
     return a.exec();
