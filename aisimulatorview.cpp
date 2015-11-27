@@ -35,7 +35,7 @@ MainWidget::MainWidget( QWidget* parent ) :
     m_cmbMap[ 2 ] = ui->cmbAttackBotAI;
     m_cmbMap[ 3 ] = ui->cmbDefenseBotAI;
 
-    for( QComboBox* cmb : m_cmbMap ) {
+    for( QComboBox * cmb : m_cmbMap ) {
         connect( cmb, SIGNAL( currentIndexChanged( int ) ), SLOT( onAIChanged( int ) ) );
     }
 
@@ -100,9 +100,42 @@ AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
 AISimulatorView::~AISimulatorView() {
 }
 
+QColor colorForDangerLevel( int level ) {
+    static const QVector< QPair< AIModel::DangerLevel, QColor > > COLOR_TABLE = {
+        qMakePair( AIModel::EXTREME, QColor( 0x33, 0x00, 0x00 ) ),
+        qMakePair( AIModel::CRITICAL, QColor( 0x33, 0x1C, 0x00 ) ),
+        qMakePair( AIModel::WARNING, QColor( 0x33, 0x31, 0x00 ) )
+    };
+
+    for( auto p : COLOR_TABLE ) {
+        if( p.first <= level ) {
+            return p.second;
+        }
+    }
+
+    return BACKGROUND_COLOR;
+}
+
 void AISimulatorView::paintEvent( QPaintEvent* ) {
     QPainter painter( this );
     painter.fillRect( 0, 0, m_width, m_height, BACKGROUND_COLOR );
+
+    const Matrix& m = m_model->getDangerMap();
+    for( size_t y = 0; y < m.size(); ++y ) {
+        for( size_t x = 0; x < m[ y ].size(); ++x ) {
+            if( m[ y ][ x ] == 0 ) {
+                continue;
+            }
+
+            drawBlock(
+                AIModel::blocksToPoints( x ) + AIModel::HALF_BLOCK_SIZE,
+                AIModel::blocksToPoints( y ) + AIModel::HALF_BLOCK_SIZE,
+                AIModel::BLOCK_SIZE,
+                colorForDangerLevel( m[ y ][ x ] ),
+                &painter
+            );
+        }
+    }
 
     if( DEBUG ) {
         painter.setPen( DEBUG_GRID_COLOR );
@@ -142,16 +175,16 @@ void AISimulatorView::drawBlock( int xPoints, int yPoints, int sizePoints, int t
         Qt::lightGray
     };
 
-    if( type <= 0 || COLOR_TABLE.size() < static_cast< size_t >( type ) ) {
-        return;
-    }
+    drawBlock( xPoints, yPoints, sizePoints, COLOR_TABLE[ type - 1 ], painter );
+}
 
+void AISimulatorView::drawBlock( int xPoints, int yPoints, int sizePoints, const QColor& color, QPainter* painter ) {
     const int sizePixels = modelPointsToPixels( sizePoints );
     const int halfSizePixels = sizePixels / 2;
 
     const int xPixels = modelPointsToPixels( xPoints ) - halfSizePixels;
     const int yPixels = modelPointsToPixels( yPoints ) - halfSizePixels;
-    painter->fillRect( xPixels, yPixels, sizePixels, sizePixels, COLOR_TABLE[ type - 1 ] );
+    painter->fillRect( xPixels, yPixels, sizePixels, sizePixels, color );
 }
 
 void AISimulatorView::onTimeOut() {

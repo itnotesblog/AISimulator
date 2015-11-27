@@ -51,6 +51,7 @@ public:
 protected:
     void paintEvent( QPaintEvent* );
     static void drawBlock( int xPoints, int yPoints, int sizePoints, int type, QPainter* painter );
+    static void drawBlock( int xPoints, int yPoints, int sizePoints, const QColor& color, QPainter* painter );
 
     void mousePressEvent( QMouseEvent* e );
 

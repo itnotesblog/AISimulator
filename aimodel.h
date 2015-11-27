@@ -23,6 +23,15 @@ public:
         return x * BLOCK_SIZE;
     }
 
+    static const int DANGER_RADIUS = 1;
+    static const int WARNING_RADIUS = 2;
+
+    enum DangerLevel {
+        WARNING = 10,
+        CRITICAL = 30,
+        EXTREME = 50
+    };
+
 public:
     AIModel();
 
@@ -49,15 +58,21 @@ public:
 
     std::vector< Bot::Direction > findPath( const Bot& bot, int x, int y ) const;
 
+    const Matrix& getDangerMap() const;
+
 private:
-    static std::shared_ptr< Bot > makeBot( int x, int y , int type = 2 );
+    static std::shared_ptr< Bot > makeBot( int x, int y, int type = 2 );
 
     Bot doMove( const Bot& bot ) const;
+
+    void refreshDangerMap();
+    void markDangerArea( int x, int y, int radius, int score );
 
 private:
     QHash< int, std::shared_ptr< BotAI > > m_aiMap;
 
     Matrix m_field;
+    Matrix m_dangerMap;
 
     QHash< int, std::shared_ptr< Bot > > m_bots;
 

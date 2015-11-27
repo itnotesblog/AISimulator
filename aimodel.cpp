@@ -66,6 +66,11 @@ void AIModel::reset() {
         { 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },
     };
 
+    m_dangerMap.clear();
+    for( size_t i = 0; i < m_field.size(); ++i ) {
+        m_dangerMap.push_back( Row( m_field[ 0 ].size() ) );
+    }
+
     m_bots.clear();
     addBot( 10, 10 );
     addBot( 10, 140 );
@@ -79,6 +84,8 @@ std::shared_ptr< Bot > AIModel::makeBot( int x, int y, int type ) {
 }
 
 void AIModel::doStep() {
+    refreshDangerMap();
+
     for( auto b : m_bots ) {
         if( m_aiMap.contains( b->getType() ) ) {
             m_aiMap[ b->getType() ]->doStep( *this, b.get() );
@@ -122,6 +129,37 @@ Bot AIModel::doMove( const Bot& bot ) const {
     }
 
     return botCopy;
+}
+
+void AIModel::refreshDangerMap() {
+    for( Row& r : m_dangerMap ) {
+        std::fill( r.begin(), r.end(), 0 );
+    }
+
+    for( auto b : m_bots ) {
+        if( b->getType() != 2 ) {
+            continue;
+        }
+
+        int x = b->getX() / BLOCK_SIZE;
+        int y = b->getY() / BLOCK_SIZE;
+        markDangerArea( x, y, DANGER_RADIUS, EXTREME );
+        markDangerArea( x, y, WARNING_RADIUS, WARNING );
+    }
+}
+
+void AIModel::markDangerArea( int x, int y, int radius, int score ) {
+    for( int row = y - radius; row <= y + radius; ++row ) {
+        for( int column = x - radius; column <= x + radius; ++column ) {
+            if(
+                column < 0 || m_field[ 0 ].size() <= static_cast< size_t >( column ) ||
+                row < 0 || m_field.size() <= static_cast< size_t >( row )
+            ) {
+                continue;
+            }
+            m_dangerMap[ row ][ column ] += score;
+        }
+    }
 }
 
 int AIModel::getBlockType( int x, int y ) const {
@@ -230,4 +268,8 @@ std::vector< Bot::Direction > AIModel::findPath( const Bot& bot, int x, int y ) 
     }
 
     return std::vector< Bot::Direction >();
+}
+
+const Matrix& AIModel::getDangerMap() const {
+    return m_dangerMap;
 }
