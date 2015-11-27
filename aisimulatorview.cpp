@@ -9,6 +9,8 @@
 #include "botai.h"
 #include "collisionresolver.h"
 
+#include "ui_mainwidget.h"
+
 static const bool DEBUG = true;
 static const int PIXELS_IN_MODEL_POINT = 2;
 static const int STEP_TIME_INTERVAL = 33;
@@ -24,36 +26,24 @@ static const QColor DEBUG_GRID_COLOR = QColor( 70, 70, 70 );
 
 // ********************************************************************************
 MainWidget::MainWidget( QWidget* parent ) :
-    QWidget( parent ), m_view( new AISimulatorView( &m_model ) ), m_aiCmb( nullptr ) {
+    QWidget( parent ), ui( new Ui::MainWidget ), m_view( new AISimulatorView( &m_model ) ) {
+    ui->setupUi( this );
 
-    m_model.setCollisionResolver( std::make_shared< CollisionResolver >() );
+    ui->viewLayout->addWidget( m_view );
+    connect( ui->btnReset, SIGNAL( clicked() ), SLOT( onReset() ) );
 
-    if( QVBoxLayout* mainLayout = new QVBoxLayout ) {
-        if( QHBoxLayout* l = new QHBoxLayout ) {
-            l->setMargin( 0 );
-            l->addStretch( 1 );
-            l->addWidget( m_view );
-            l->addStretch( 1 );
-            mainLayout->addLayout( l );
-        }
-        if( QHBoxLayout* panelLayout = new QHBoxLayout ) {
-            panelLayout->setMargin( 0 );
-            if( QPushButton* resetBtn = new QPushButton( "Reset" ) ) {
-                panelLayout->addWidget( resetBtn );
-                connect( resetBtn, SIGNAL( clicked() ), SLOT( onReset() ) );
-            }
-            panelLayout->addStretch( 1 );
-            if( ( m_aiCmb = new QComboBox ) ) {
-                panelLayout->addWidget( m_aiCmb );
-                connect( m_aiCmb, SIGNAL( currentIndexChanged( int ) ), SLOT( onAIChanged( int ) ) );
-            }
-            mainLayout->addLayout( panelLayout );
-        }
+    m_cmbMap[ 2 ] = ui->cmbAttackBotAI;
+    m_cmbMap[ 3 ] = ui->cmbDefenseBotAI;
 
-        setLayout( mainLayout );
+    for( QComboBox* cmb : m_cmbMap ) {
+        connect( cmb, SIGNAL( currentIndexChanged( int ) ), SLOT( onAIChanged( int ) ) );
     }
 
-    onAIChanged( 0 );
+    m_model.setCollisionResolver( std::make_shared< CollisionResolver >() );
+}
+
+MainWidget::~MainWidget() {
+    delete ui;
 }
 
 void MainWidget::onReset() {
@@ -63,20 +53,35 @@ void MainWidget::onReset() {
     }
 }
 
-void MainWidget::registerAI( const QString& name, BotAI* ai ) {
-    if( m_aiCmb ) {
-        m_aiCmb->addItem( name );
-        m_ais.push_back( std::shared_ptr< BotAI >( ai ) );
-    }
+void MainWidget::registerAI( const QString& name, const std::set< int >& botTypes, BotAI* ai ) {
+    m_ais.push_back( std::shared_ptr< BotAI >( ai ) );
 
-    if( m_ais.size() == 1 ) {
-        onAIChanged( 0 );
+    for( int type : botTypes ) {
+        if( m_cmbMap.contains( type ) ) {
+            m_cmbMap[ type ]->addItem( name );
+            m_aiMap[ type ][ m_cmbMap[ type ]->count() - 1 ] = m_ais.size() - 1;
+
+            if( m_aiMap[ type ].size() == 1 ) {
+                onAIChanged( type, 0 );
+            }
+        }
     }
 }
 
 void MainWidget::onAIChanged( int i ) {
-    if( 0 <= i && static_cast< size_t >( i ) < m_ais.size() ) {
-        m_model.setAI( m_ais[ i ], 2 );
+    if( QComboBox* cmb = dynamic_cast< QComboBox* >( sender() ) ) {
+        for( int botType : m_cmbMap.keys() ) {
+            if( m_cmbMap[ botType ] == cmb ) {
+                onAIChanged( botType, i );
+                return;
+            }
+        }
+    }
+}
+
+void MainWidget::onAIChanged( int botType, int i ) {
+    if( m_aiMap.contains( botType ) && m_aiMap[ botType ].contains( i ) ) {
+        m_model.setAI( m_ais[ m_aiMap[ botType ][ i ] ], botType );
     }
 }
 

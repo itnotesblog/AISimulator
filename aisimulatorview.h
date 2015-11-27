@@ -10,24 +10,34 @@ class QComboBox;
 
 class AISimulatorView;
 
+namespace Ui {
+class MainWidget;
+}
+
 // ********************************************************************************
 class MainWidget : public QWidget {
     Q_OBJECT
 public:
     MainWidget( QWidget* parent = 0 );
+    ~MainWidget();
 
-    void registerAI( const QString& name, BotAI* ai );
+    void registerAI( const QString& name, const std::set< int >& botTypes, BotAI* ai );
 
 private slots:
     void onReset();
     void onAIChanged( int i );
+    void onAIChanged( int botType, int i );
 
 private:
+    Ui::MainWidget* ui;
+
     AIModel m_model;
     AISimulatorView* m_view;
-    QComboBox* m_aiCmb;
 
     std::vector< std::shared_ptr< BotAI > > m_ais;
+
+    QHash< int, QComboBox* > m_cmbMap;
+    QHash< int, QHash< int, int > > m_aiMap;
 };
 
 // ********************************************************************************

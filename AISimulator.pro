@@ -40,3 +40,6 @@ HEADERS  += aisimulatorview.h \
     smartpathfinderai.h
 
 QMAKE_CXXFLAGS += -std=c++11
+
+FORMS += \
+    mainwidget.ui

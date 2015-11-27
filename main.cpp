@@ -13,13 +13,13 @@ int main( int argc, char* argv[] ) {
     QApplication a( argc, argv );
 
     MainWidget w;
-    w.registerAI( "EasyRandomAI", new EasyRandomAI );
-    w.registerAI( "SmartRandomAI", new SmartRandomAI );
-    w.registerAI( "SingleMemRandomAI", new SingleMemRandomAI );
-    w.registerAI( "AccumulatingRandomAI", new AccumulatingRandomAI );
-    w.registerAI( "SmartSingleMemRandomAI", new SmartSingleMemRandomAI );
-    w.registerAI( "PathFinderAI", new PathFinderAI );
-    w.registerAI( "SmartPathFinderAI", new SmartPathFinderAI );
+    w.registerAI( "EasyRandomAI", { 2, 3 }, new EasyRandomAI );
+    w.registerAI( "SmartRandomAI", { 2, 3 }, new SmartRandomAI );
+    w.registerAI( "SingleMemRandomAI", { 2, 3 }, new SingleMemRandomAI );
+    w.registerAI( "AccumulatingRandomAI", { 2, 3 }, new AccumulatingRandomAI );
+    w.registerAI( "SmartSingleMemRandomAI", { 2, 3 }, new SmartSingleMemRandomAI );
+    w.registerAI( "PathFinderAI", { 2 }, new PathFinderAI );
+    w.registerAI( "SmartPathFinderAI", { 2 }, new SmartPathFinderAI );
     w.show();
 
     return a.exec();

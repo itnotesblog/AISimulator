@@ -28,7 +28,7 @@ int AIModel::getHeight() const {
     return m_field.size();
 }
 
-void AIModel::setAI( const std::shared_ptr< BotAI >& ai , int botType ) {
+void AIModel::setAI( const std::shared_ptr< BotAI >& ai, int botType ) {
     m_aiMap[ botType ] = ai;
 }
 
