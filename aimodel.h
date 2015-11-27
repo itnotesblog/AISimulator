@@ -23,13 +23,15 @@ public:
         return x * BLOCK_SIZE;
     }
 
-    static const int DANGER_RADIUS = 1;
+    static const int DEATH_RADIUS = 0;
+    static const int EXTREME_DANGER_RADIUS = 1;
     static const int WARNING_RADIUS = 2;
 
     enum DangerLevel {
         WARNING = 10,
         CRITICAL = 30,
-        EXTREME = 50
+        EXTREME = 50,
+        DEATH = 100
     };
 
 public:
@@ -48,6 +50,8 @@ public:
     void reset();
     void doStep();
 
+    Bot doMove( const Bot& bot ) const;
+
     int getBlockType( int x, int y ) const;
 
     QList< std::shared_ptr< Bot > > getBots() const;
@@ -62,8 +66,6 @@ public:
 
 private:
     static std::shared_ptr< Bot > makeBot( int x, int y, int type = 2 );
-
-    Bot doMove( const Bot& bot ) const;
 
     void refreshDangerMap();
     void markDangerArea( int x, int y, int radius, int score );

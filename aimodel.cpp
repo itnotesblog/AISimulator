@@ -143,7 +143,8 @@ void AIModel::refreshDangerMap() {
 
         int x = b->getX() / BLOCK_SIZE;
         int y = b->getY() / BLOCK_SIZE;
-        markDangerArea( x, y, DANGER_RADIUS, EXTREME );
+        markDangerArea( x, y, DEATH_RADIUS, DEATH );
+        markDangerArea( x, y, EXTREME_DANGER_RADIUS, EXTREME );
         markDangerArea( x, y, WARNING_RADIUS, WARNING );
     }
 }
