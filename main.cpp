@@ -1,6 +1,7 @@
 #include "aisimulatorview.h"
 #include <QApplication>
 
+#include "nullbotai.h"
 #include "easyrandomai.h"
 #include "smartrandomai.h"
 #include "singlememrandomai.h"
@@ -13,6 +14,7 @@ int main( int argc, char* argv[] ) {
     QApplication a( argc, argv );
 
     MainWidget w;
+    w.registerAI( "NullBotAI", { 2, 3 }, new NullBotAI );
     w.registerAI( "EasyRandomAI", { 2, 3 }, new EasyRandomAI );
     w.registerAI( "SmartRandomAI", { 2, 3 }, new SmartRandomAI );
     w.registerAI( "SingleMemRandomAI", { 2, 3 }, new SingleMemRandomAI );

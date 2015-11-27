@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     smartsinglememrandomai.cpp \
     collisionresolver.cpp \
     pathfinderai.cpp \
-    smartpathfinderai.cpp
+    smartpathfinderai.cpp \
+    nullbotai.cpp
 
 HEADERS  += aisimulatorview.h \
     aimodel.h \
@@ -37,7 +38,8 @@ HEADERS  += aisimulatorview.h \
     smartsinglememrandomai.h \
     collisionresolver.h \
     pathfinderai.h \
-    smartpathfinderai.h
+    smartpathfinderai.h \
+    nullbotai.h
 
 QMAKE_CXXFLAGS += -std=c++11
 
