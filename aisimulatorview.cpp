@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QMouseEvent>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "botai.h"
 #include "collisionresolver.h"
@@ -14,6 +16,8 @@
 static const bool DEBUG = true;
 static const int PIXELS_IN_MODEL_POINT = 2;
 static const int STEP_TIME_INTERVAL = 33;
+
+static const QString MAP_FILE_EXT = ".map";
 
 int modelPointsToPixels( int x ) {
     return x * PIXELS_IN_MODEL_POINT;
@@ -30,6 +34,8 @@ MainWidget::MainWidget( QWidget* parent ) :
     ui->setupUi( this );
 
     ui->viewLayout->addWidget( m_view );
+    connect( ui->bnSave, SIGNAL( clicked() ), SLOT( onSave() ) );
+    connect( ui->bnLoad, SIGNAL( clicked() ), SLOT( onLoad() ) );
     connect( ui->btnReset, SIGNAL( clicked() ), SLOT( onReset() ) );
     connect( ui->bnKillBots, SIGNAL( clicked() ), SLOT( onKillBots() ) );
 
@@ -59,10 +65,15 @@ MainWidget::~MainWidget() {
 }
 
 void MainWidget::onReset() {
-    m_model.reset();
+    m_model.reset( m_model.getWidth(), m_model.getHeight() );
     for( auto ai : m_ais ) {
         ai->reset();
     }
+
+    m_view->setSize(
+        modelPointsToPixels( AIModel::blocksToPoints( m_model.getWidth() ) ),
+        modelPointsToPixels( AIModel::blocksToPoints( m_model.getHeight() ) )
+    );
 }
 
 void MainWidget::onKillBots() {
@@ -112,10 +123,46 @@ void MainWidget::onToolChanged() {
     }
 }
 
+void MainWidget::onLoad() {
+    QString fileName = QFileDialog::getOpenFileName( this, "Load file", ".", QString( "*%1" ).arg( MAP_FILE_EXT ) );
+    if( fileName.isEmpty() ) {
+        return;
+    }
+
+    if( !fileName.endsWith( MAP_FILE_EXT ) ) {
+        fileName += MAP_FILE_EXT;
+    }
+
+    if( !m_model.load( fileName ) ) {
+        QMessageBox::warning( this, "Error", QString( "Failed to load file '%1'" ).arg( fileName ) );
+    }
+
+    m_view->setSize(
+        modelPointsToPixels( AIModel::blocksToPoints( m_model.getWidth() ) ),
+        modelPointsToPixels( AIModel::blocksToPoints( m_model.getHeight() ) )
+    );
+}
+
+void MainWidget::onSave() {
+    QString fileName = QFileDialog::getSaveFileName( this, "Save file", ".", QString( "*%1" ).arg( MAP_FILE_EXT ) );
+    if( fileName.isEmpty() ) {
+        return;
+    }
+
+    if( !fileName.endsWith( MAP_FILE_EXT ) ) {
+        fileName += MAP_FILE_EXT;
+    }
+
+    if( !m_model.save( fileName ) ) {
+        QMessageBox::warning( this, "Error", QString( "Failed to save file '%1'" ).arg( fileName ) );
+    }
+}
+
 // ********************************************************************************
 AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
     QWidget( parent ), m_model( model ), m_pressedLeft( false ), m_pressedRight( false ) {
     setActiveItem( WALL );
+    setCursor( Qt::CrossCursor );
 
     m_width = modelPointsToPixels( AIModel::blocksToPoints( m_model->getWidth() ) );
     m_height = modelPointsToPixels( AIModel::blocksToPoints( m_model->getHeight() ) );
@@ -130,11 +177,12 @@ AISimulatorView::~AISimulatorView() {
 
 void AISimulatorView::setActiveItem( AISimulatorView::ActiveItem item ) {
     m_item = item;
-    if( m_item ) {
-        setCursor( Qt::CrossCursor );
-    } else {
-        setCursor( Qt::PointingHandCursor );
-    }
+}
+
+void AISimulatorView::setSize( int width, int height ) {
+    m_width = width;
+    m_height = height;
+    setMinimumSize( m_width, m_height );
 }
 
 QColor colorForDangerLevel( int level ) {
@@ -235,7 +283,7 @@ void AISimulatorView::mousePressEvent( QMouseEvent* e ) {
     onMouseEvent( e );
 }
 
-void AISimulatorView::mouseReleaseEvent( QMouseEvent * ) {
+void AISimulatorView::mouseReleaseEvent( QMouseEvent* ) {
     m_pressedLeft = false;
     m_pressedRight = false;
 }

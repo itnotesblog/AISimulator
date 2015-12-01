@@ -43,6 +43,9 @@ public:
     int getWidth() const;
     int getHeight() const;
 
+    bool save( const QString& fileName ) const;
+    bool load( const QString& fileName );
+
     void setAI( const std::shared_ptr< BotAI >& ai, int botType );
 
     void setCollisionResolver( const std::shared_ptr< CollisionResolver >& resolver );
@@ -76,6 +79,7 @@ private:
 
     void refreshDangerMap();
     void markDangerArea( int x, int y, int radius, int score );
+    void resetDangerMap();
 
 private:
     QHash< int, std::shared_ptr< BotAI > > m_aiMap;

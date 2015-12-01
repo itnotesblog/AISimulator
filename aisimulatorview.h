@@ -32,6 +32,9 @@ private slots:
 
     void onToolChanged();
 
+    void onLoad();
+    void onSave();
+
 private:
     Ui::MainWidget* ui;
 
@@ -64,6 +67,8 @@ public:
     ~AISimulatorView();
 
     void setActiveItem( ActiveItem item );
+
+    void setSize( int width, int height );
 
 protected:
     void paintEvent( QPaintEvent* );

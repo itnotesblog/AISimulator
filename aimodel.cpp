@@ -2,6 +2,9 @@
 
 #include <QSet>
 #include <QQueue>
+#include <QFile>
+#include <QTextStream>
+#include <QStringList>
 
 #include "botai.h"
 #include "collisionresolver.h"
@@ -26,6 +29,58 @@ int AIModel::getWidth() const {
 
 int AIModel::getHeight() const {
     return m_field.size();
+}
+
+bool AIModel::save( const QString &fileName ) const {
+    QFile f( fileName );
+    if( !f.open( QIODevice::WriteOnly ) ) {
+        return false;
+    }
+
+    QTextStream str( &f );
+    for( auto row : m_field ) {
+        for( auto it = row.begin(); it != row.end(); ++it ) {
+            str << *it;
+            if( it + 1 != row.end() ) {
+                str << ", ";
+            }
+        }
+        str << "\n";
+    }
+
+    return true;
+}
+
+bool AIModel::load( const QString &fileName ) {
+    QFile f( fileName );
+    if( !f.open( QIODevice::ReadOnly ) ) {
+        return false;
+    }
+
+    QTextStream str( &f );
+    Matrix field;
+    QStringList rowStr;
+    while( ( rowStr = str.readLine().split( "," ) ).length() > 1 ) {
+        if( !field.empty() && field[ 0 ].size() != static_cast< size_t >( rowStr.length() ) ) {
+            return false;
+        }
+        Row row;
+        for( auto rStr : rowStr ) {
+            bool ok = false;
+            row.push_back( rStr.toInt( &ok ) );
+            if( !ok ) {
+                return false;
+            }
+        }
+
+        field.push_back( row );
+    }
+
+    m_bots.clear();
+    m_field = field;
+    resetDangerMap();
+
+    return true;
 }
 
 void AIModel::setAI( const std::shared_ptr< BotAI >& ai, int botType ) {
@@ -88,10 +143,7 @@ void AIModel::reset( int width, int height ) {
         m_field.push_back( Row( width ) );
     }
 
-    m_dangerMap.clear();
-    for( size_t i = 0; i < m_field.size(); ++i ) {
-        m_dangerMap.push_back( Row( m_field[ 0 ].size() ) );
-    }
+    resetDangerMap();
 
     killBots();
 }
@@ -181,6 +233,13 @@ void AIModel::markDangerArea( int x, int y, int radius, int score ) {
             }
             m_dangerMap[ row ][ column ] += score;
         }
+    }
+}
+
+void AIModel::resetDangerMap() {
+    m_dangerMap.clear();
+    for( size_t i = 0; i < m_field.size(); ++i ) {
+        m_dangerMap.push_back( Row( m_field[ 0 ].size() ) );
     }
 }
 
