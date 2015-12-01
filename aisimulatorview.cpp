@@ -31,15 +31,27 @@ MainWidget::MainWidget( QWidget* parent ) :
 
     ui->viewLayout->addWidget( m_view );
     connect( ui->btnReset, SIGNAL( clicked() ), SLOT( onReset() ) );
+    connect( ui->bnKillBots, SIGNAL( clicked() ), SLOT( onKillBots() ) );
 
     m_cmbMap[ 2 ] = ui->cmbAttackBotAI;
     m_cmbMap[ 3 ] = ui->cmbDefenseBotAI;
 
-    for( QComboBox * cmb : m_cmbMap ) {
+    m_toolItemMap[ ui->bnWall ] = AISimulatorView::WALL;
+    m_toolItemMap[ ui->bnAttackBot ] = AISimulatorView::ATTACK_BOT;
+    m_toolItemMap[ ui->bnDefenseBot ] = AISimulatorView::DEFENSE_BOT;
+    m_toolItemMap[ ui->bnRemove ] = AISimulatorView::REMOVE;
+
+    for( QComboBox* cmb : m_cmbMap ) {
         connect( cmb, SIGNAL( currentIndexChanged( int ) ), SLOT( onAIChanged( int ) ) );
     }
 
     m_model.setCollisionResolver( std::make_shared< CollisionResolver >() );
+
+    for( int i = 0; i < ui->layoutTools->count(); ++i ) {
+        if( QPushButton* btn = dynamic_cast< QPushButton* >( ui->layoutTools->itemAt( i )->widget() ) ) {
+            connect( btn, SIGNAL( clicked() ), SLOT( onToolChanged() ) );
+        }
+    }
 }
 
 MainWidget::~MainWidget() {
@@ -51,6 +63,10 @@ void MainWidget::onReset() {
     for( auto ai : m_ais ) {
         ai->reset();
     }
+}
+
+void MainWidget::onKillBots() {
+    m_model.killBots();
 }
 
 void MainWidget::registerAI( const QString& name, const std::set< int >& botTypes, BotAI* ai ) {
@@ -85,9 +101,21 @@ void MainWidget::onAIChanged( int botType, int i ) {
     }
 }
 
+void MainWidget::onToolChanged() {
+    for( int i = 0; i < ui->layoutTools->count(); ++i ) {
+        if( QPushButton* btn = dynamic_cast< QPushButton* >( ui->layoutTools->itemAt( i )->widget() ) ) {
+            btn->setChecked( btn == sender() );
+            if( btn->isChecked() ) {
+                m_view->setActiveItem( AISimulatorView::ActiveItem( m_toolItemMap[ btn ] ) );
+            }
+        }
+    }
+}
+
 // ********************************************************************************
 AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
-    QWidget( parent ), m_model( model ) {
+    QWidget( parent ), m_model( model ), m_pressedLeft( false ), m_pressedRight( false ) {
+    setActiveItem( WALL );
 
     m_width = modelPointsToPixels( AIModel::blocksToPoints( m_model->getWidth() ) );
     m_height = modelPointsToPixels( AIModel::blocksToPoints( m_model->getHeight() ) );
@@ -98,6 +126,15 @@ AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
 }
 
 AISimulatorView::~AISimulatorView() {
+}
+
+void AISimulatorView::setActiveItem( AISimulatorView::ActiveItem item ) {
+    m_item = item;
+    if( m_item ) {
+        setCursor( Qt::CrossCursor );
+    } else {
+        setCursor( Qt::PointingHandCursor );
+    }
 }
 
 QColor colorForDangerLevel( int level ) {
@@ -193,13 +230,52 @@ void AISimulatorView::onTimeOut() {
 }
 
 void AISimulatorView::mousePressEvent( QMouseEvent* e ) {
-    if( e->button() != Qt::LeftButton ) {
-        QWidget::mousePressEvent( e );
+    m_pressedLeft = e->button() == Qt::LeftButton;
+    m_pressedRight = e->button() == Qt::RightButton;
+    onMouseEvent( e );
+}
+
+void AISimulatorView::mouseReleaseEvent( QMouseEvent * ) {
+    m_pressedLeft = false;
+    m_pressedRight = false;
+}
+
+void AISimulatorView::mouseMoveEvent( QMouseEvent* e ) {
+    if( !m_pressedLeft && ! m_pressedRight ) {
         return;
     }
 
-    int x = AIModel::blocksToPoints( e->pos().x() / PIXELS_IN_MODEL_POINT / AIModel::BLOCK_SIZE ) + AIModel::HALF_BLOCK_SIZE;
-    int y = AIModel::blocksToPoints( e->pos().y() / PIXELS_IN_MODEL_POINT / AIModel::BLOCK_SIZE ) + AIModel::HALF_BLOCK_SIZE;
-    m_model->addBot( x, y, 3 );
+    onMouseEvent( e );
+}
+
+void AISimulatorView::onMouseEvent( QMouseEvent* e ) {
+    int xBlocks = e->pos().x() / PIXELS_IN_MODEL_POINT / AIModel::BLOCK_SIZE;
+    int yBlocks = e->pos().y() / PIXELS_IN_MODEL_POINT / AIModel::BLOCK_SIZE;
+
+    int xPoints = AIModel::blocksToPoints( xBlocks ) + AIModel::HALF_BLOCK_SIZE;
+    int yPoints = AIModel::blocksToPoints( yBlocks ) + AIModel::HALF_BLOCK_SIZE;
+
+    ActiveItem item = m_item;
+    if( m_pressedRight ) {
+        item = REMOVE;
+    }
+
+    switch( item ) {
+    case WALL:
+        m_model->addWall( xBlocks, yBlocks );
+        break;
+    case ATTACK_BOT:
+        m_model->addBot( xPoints, yPoints, 2 );
+        break;
+    case DEFENSE_BOT:
+        m_model->addBot( xPoints, yPoints, 3 );
+        break;
+    case REMOVE:
+        m_model->remove( xBlocks, yBlocks );
+        break;
+    default:
+        break;
+    }
+
     repaint();
 }

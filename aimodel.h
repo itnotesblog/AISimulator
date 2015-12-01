@@ -23,6 +23,9 @@ public:
         return x * BLOCK_SIZE;
     }
 
+    static const int DEFAULT_WIDTH = 15;
+    static const int DEFAULT_HEIGHT = 15;
+
     static const int DEATH_RADIUS = 0;
     static const int EXTREME_DANGER_RADIUS = 1;
     static const int WARNING_RADIUS = 2;
@@ -35,7 +38,7 @@ public:
     };
 
 public:
-    AIModel();
+    AIModel( int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT );
 
     int getWidth() const;
     int getHeight() const;
@@ -44,10 +47,14 @@ public:
 
     void setCollisionResolver( const std::shared_ptr< CollisionResolver >& resolver );
 
+    bool addWall( int x, int y );
+    bool remove( int x, int y );
+
     bool addBot( int x, int y, int type = 2 );
     bool addBot( const std::shared_ptr< Bot >& bot );
 
-    void reset();
+    void reset( int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT );
+    void killBots();
     void doStep();
 
     Bot doMove( const Bot& bot ) const;

@@ -7,6 +7,7 @@
 #include "aimodel.h"
 
 class QComboBox;
+class QPushButton;
 
 class AISimulatorView;
 
@@ -25,8 +26,11 @@ public:
 
 private slots:
     void onReset();
+    void onKillBots();
     void onAIChanged( int i );
     void onAIChanged( int botType, int i );
+
+    void onToolChanged();
 
 private:
     Ui::MainWidget* ui;
@@ -38,15 +42,28 @@ private:
 
     QHash< int, QComboBox* > m_cmbMap;
     QHash< int, QHash< int, int > > m_aiMap;
+
+    QHash< QPushButton*, int > m_toolItemMap;
 };
 
 // ********************************************************************************
 class AISimulatorView : public QWidget {
     Q_OBJECT
+public:
+    enum ActiveItem {
+        WALL,
+        ATTACK_BOT,
+        DEFENSE_BOT,
+
+        REMOVE
+
+    };
 
 public:
     AISimulatorView( AIModel* model, QWidget* parent = 0 );
     ~AISimulatorView();
+
+    void setActiveItem( ActiveItem item );
 
 protected:
     void paintEvent( QPaintEvent* );
@@ -54,6 +71,10 @@ protected:
     static void drawBlock( int xPoints, int yPoints, int sizePoints, const QColor& color, QPainter* painter );
 
     void mousePressEvent( QMouseEvent* e );
+    void mouseReleaseEvent( QMouseEvent* );
+    void mouseMoveEvent( QMouseEvent* e );
+
+    void onMouseEvent( QMouseEvent* e );
 
 private slots:
     void onTimeOut();
@@ -65,6 +86,10 @@ private:
     int m_height;
 
     QTimer m_timer;
+
+    bool m_pressedLeft;
+    bool m_pressedRight;
+    ActiveItem m_item;
 
 };
 

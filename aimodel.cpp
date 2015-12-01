@@ -15,9 +15,9 @@ uint qHash( const QPoint& point ) {
     return qHash( static_cast < qint64 >( point.x() ) << 32 | point.y() );
 }
 
-AIModel::AIModel() {
+AIModel::AIModel( int width, int height ) {
     srand( time( 0 ) );
-    reset();
+    reset( width, height );
 }
 
 int AIModel::getWidth() const {
@@ -36,6 +36,39 @@ void AIModel::setCollisionResolver( const std::shared_ptr< CollisionResolver >& 
     m_resolver = resolver;
 }
 
+bool AIModel::addWall( int x, int y ) {
+    if( getBlockType( x, y ) < 0 ) {
+        return false;
+    }
+
+    m_field[ y ][ x ] = 1;
+
+    for( auto b : m_bots ) {
+        if( hasCollisions( *b ) ) {
+            m_field[ y ][ x ] = 0;
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool AIModel::remove( int x, int y ) {
+    if( getBlockType( x, y ) < 0 ) {
+        return false;
+    }
+
+    m_field[ y ][ x ] = 0;
+
+    for( auto b : m_bots ) {
+        if( b->getX() / BLOCK_SIZE == x && b->getY() / BLOCK_SIZE == y ) {
+            b->die();
+        }
+    }
+
+    return true;
+}
+
 bool AIModel::addBot( int x, int y, int type ) {
     return addBot( makeBot( x, y, type ) );
 }
@@ -49,34 +82,22 @@ bool AIModel::addBot( const std::shared_ptr< Bot >& bot ) {
     return true;
 }
 
-void AIModel::reset() {
-    m_field = {
-        { 0, 0, 1, 0, 0, 1, 0, 0, 0, 0 },
-        { 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 1, 0, 1, 0, 0, 1, 0, 1, 0, 0 },
-        { 0, 0, 1, 0, 0, 1, 0, 1, 0, 0 },
-        { 0, 0, 1, 0, 0, 1, 0, 1, 0, 1 },
-        { 0, 0, 1, 1, 1, 1, 0, 1, 0, 0 },
-        { 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },
-        { 0, 0, 1, 0, 1, 1, 0, 1, 0, 0 },
-        { 1, 0, 1, 0, 1, 1, 0, 1, 1, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
-        { 0, 0, 1, 0, 0, 0, 0, 1, 0, 0 },
-    };
+void AIModel::reset( int width, int height ) {
+    m_field.clear();
+    for( int i = 0; i < height; ++i ) {
+        m_field.push_back( Row( width ) );
+    }
 
     m_dangerMap.clear();
     for( size_t i = 0; i < m_field.size(); ++i ) {
         m_dangerMap.push_back( Row( m_field[ 0 ].size() ) );
     }
 
+    killBots();
+}
+
+void AIModel::killBots() {
     m_bots.clear();
-    addBot( 10, 10 );
-    addBot( 10, 140 );
-    addBot( 110, 10 );
-    addBot( 110, 140 );
-    addBot( 54, 50 );
 }
 
 std::shared_ptr< Bot > AIModel::makeBot( int x, int y, int type ) {
@@ -132,7 +153,7 @@ Bot AIModel::doMove( const Bot& bot ) const {
 }
 
 void AIModel::refreshDangerMap() {
-    for( Row& r : m_dangerMap ) {
+    for( Row & r : m_dangerMap ) {
         std::fill( r.begin(), r.end(), 0 );
     }
 
