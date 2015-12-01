@@ -8,5 +8,8 @@
 void SmartRandomAI::doStep( const AIModel& model, Bot* bot ) {
     auto directions = model.findValidDirections( *bot );
     bot->startMoving();
-    bot->setDirection( directions[ rand() % directions.size() ] );
+
+    if( !directions.empty() ) {
+        bot->setDirection( directions[ rand() % directions.size() ] );
+    }
 }

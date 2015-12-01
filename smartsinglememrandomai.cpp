@@ -12,6 +12,9 @@ void SmartSingleMemRandomAI::doStep( const AIModel& model, Bot* bot ) {
     bot->startMoving();
 
     auto directions = model.findValidDirections( *bot );
+    if( directions.empty() ) {
+        return;
+    }
 
     QVector< Bot::Direction > openedDirections;
     for( Bot::Direction d : directions ) {

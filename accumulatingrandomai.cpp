@@ -16,6 +16,10 @@ void AccumulatingRandomAI::doStep( const AIModel& model, Bot* bot ) {
     }
 
     auto directions = model.findValidDirections( *bot );
+    if( directions.empty() ) {
+        return;
+    }
+
     std::vector< double > chances( Bot::DIRECTION_COUNT, 0 );
     for( auto d : directions ) {
         chances[ d ] = m_memory[ bot->getID() ][ d ];
