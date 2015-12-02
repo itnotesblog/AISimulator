@@ -26,6 +26,7 @@ public:
 
 private slots:
     void onReset();
+    void resetAIs();
     void onKillBots();
     void onAIChanged( int i );
     void onAIChanged( int botType, int i );

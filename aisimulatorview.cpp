@@ -66,14 +66,13 @@ MainWidget::~MainWidget() {
 
 void MainWidget::onReset() {
     m_model.reset( m_model.getWidth(), m_model.getHeight() );
+    resetAIs();
+}
+
+void MainWidget::resetAIs() {
     for( auto ai : m_ais ) {
         ai->reset();
     }
-
-    m_view->setSize(
-        modelPointsToPixels( AIModel::blocksToPoints( m_model.getWidth() ) ),
-        modelPointsToPixels( AIModel::blocksToPoints( m_model.getHeight() ) )
-    );
 }
 
 void MainWidget::onKillBots() {
@@ -137,6 +136,7 @@ void MainWidget::onLoad() {
         QMessageBox::warning( this, "Error", QString( "Failed to load file '%1'" ).arg( fileName ) );
     }
 
+    resetAIs();
     m_view->setSize(
         modelPointsToPixels( AIModel::blocksToPoints( m_model.getWidth() ) ),
         modelPointsToPixels( AIModel::blocksToPoints( m_model.getHeight() ) )
