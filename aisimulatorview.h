@@ -58,6 +58,7 @@ public:
         ATTACK_BOT,
         DEFENSE_BOT,
 
+        KILL,
         REMOVE
 
     };

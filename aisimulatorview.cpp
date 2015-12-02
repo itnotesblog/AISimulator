@@ -45,7 +45,7 @@ MainWidget::MainWidget( QWidget* parent ) :
     m_toolItemMap[ ui->bnWall ] = AISimulatorView::WALL;
     m_toolItemMap[ ui->bnAttackBot ] = AISimulatorView::ATTACK_BOT;
     m_toolItemMap[ ui->bnDefenseBot ] = AISimulatorView::DEFENSE_BOT;
-    m_toolItemMap[ ui->bnRemove ] = AISimulatorView::REMOVE;
+    m_toolItemMap[ ui->bnKill ] = AISimulatorView::KILL;
 
     for( QComboBox* cmb : m_cmbMap ) {
         connect( cmb, SIGNAL( currentIndexChanged( int ) ), SLOT( onAIChanged( int ) ) );
@@ -317,6 +317,9 @@ void AISimulatorView::onMouseEvent( QMouseEvent* e ) {
         break;
     case DEFENSE_BOT:
         m_model->addBot( xPoints, yPoints, 3 );
+        break;
+    case KILL:
+        m_model->kill( xBlocks, yBlocks );
         break;
     case REMOVE:
         m_model->remove( xBlocks, yBlocks );

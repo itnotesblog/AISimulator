@@ -31,7 +31,7 @@ int AIModel::getHeight() const {
     return m_field.size();
 }
 
-bool AIModel::save( const QString &fileName ) const {
+bool AIModel::save( const QString& fileName ) const {
     QFile f( fileName );
     if( !f.open( QIODevice::WriteOnly ) ) {
         return false;
@@ -51,7 +51,7 @@ bool AIModel::save( const QString &fileName ) const {
     return true;
 }
 
-bool AIModel::load( const QString &fileName ) {
+bool AIModel::load( const QString& fileName ) {
     QFile f( fileName );
     if( !f.open( QIODevice::ReadOnly ) ) {
         return false;
@@ -114,6 +114,15 @@ bool AIModel::remove( int x, int y ) {
     }
 
     m_field[ y ][ x ] = 0;
+    kill( x, y );
+
+    return true;
+}
+
+bool AIModel::kill( int x, int y ) {
+    if( getBlockType( x, y ) < 0 ) {
+        return false;
+    }
 
     for( auto b : m_bots ) {
         if( b->getX() / BLOCK_SIZE == x && b->getY() / BLOCK_SIZE == y ) {

@@ -52,6 +52,7 @@ public:
 
     bool addWall( int x, int y );
     bool remove( int x, int y );
+    bool kill( int x, int y );
 
     bool addBot( int x, int y, int type = 2 );
     bool addBot( const std::shared_ptr< Bot >& bot );

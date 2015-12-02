@@ -149,7 +149,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="bnRemove">
+      <widget class="QPushButton" name="bnKill">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
