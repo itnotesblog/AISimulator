@@ -31,6 +31,27 @@ int AIModel::getHeight() const {
     return m_field.size();
 }
 
+void AIModel::resize( int width, int height ) {
+    if( width < MIN_WIDTH || MAX_WIDTH < width || height < MIN_HEIGHT || MAX_HEIGHT < height ) {
+        return;
+    }
+
+    m_field.resize( height );
+    for( Row& r : m_field ) {
+        r.resize( width );
+    }
+
+    for( auto b : m_bots ) {
+        if( hasCollisions( *b ) ) {
+            b->die();
+        }
+    }
+
+    cleanDeadBots();
+    resetDangerMap();
+    refreshDangerMap();
+}
+
 bool AIModel::save( const QString& fileName ) const {
     QFile f( fileName );
     if( !f.open( QIODevice::WriteOnly ) ) {

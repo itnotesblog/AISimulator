@@ -32,6 +32,8 @@ private slots:
     void onAIChanged( int i );
     void onAIChanged( int botType, int i );
 
+    void onMapResize();
+
     void onToolChanged();
 
     void onLoad();
@@ -49,6 +51,8 @@ private:
     QHash< int, QHash< int, int > > m_aiMap;
 
     QHash< QPushButton*, int > m_toolItemMap;
+
+    bool m_loading;
 };
 
 // ********************************************************************************
@@ -71,7 +75,7 @@ public:
 
     void setActiveItem( ActiveItem item );
 
-    void setSize( int width, int height );
+    void refreshSize();
 
     void start( double xSpeed = 1.0 );
     void pause();

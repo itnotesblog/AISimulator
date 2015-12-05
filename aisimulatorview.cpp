@@ -30,7 +30,7 @@ static const QColor DEBUG_GRID_COLOR = QColor( 70, 70, 70 );
 
 // ********************************************************************************
 MainWidget::MainWidget( QWidget* parent ) :
-    QWidget( parent ), ui( new Ui::MainWidget ), m_view( new AISimulatorView( &m_model ) ) {
+    QWidget( parent ), ui( new Ui::MainWidget ), m_view( new AISimulatorView( &m_model ) ), m_loading( false ) {
     ui->setupUi( this );
 
     setWindowTitle( "AISimulator" );
@@ -56,6 +56,9 @@ MainWidget::MainWidget( QWidget* parent ) :
     connect( ui->bnStart, SIGNAL( clicked() ), SLOT( onStartPause() ) );
     connect( ui->bnPause, SIGNAL( clicked() ), SLOT( onStartPause() ) );
     connect( ui->cmbSpeed, SIGNAL( currentIndexChanged( int ) ), SLOT( onStartPause() ) );
+
+    connect( ui->sliderWidth, SIGNAL( valueChanged( int ) ), SLOT( onMapResize() ) );
+    connect( ui->sliderHeight, SIGNAL( valueChanged( int ) ), SLOT( onMapResize() ) );
 
     ui->cmbSpeed->setCurrentIndex( 2 );
 
@@ -132,6 +135,20 @@ void MainWidget::onAIChanged( int botType, int i ) {
     }
 }
 
+void MainWidget::onMapResize() {
+    if( m_loading ) {
+        return;
+    }
+
+    m_model.resize( ui->sliderWidth->value(), ui->sliderHeight->value() );
+    m_view->refreshSize();
+
+    if( !isMaximized() && !isMinimized() ) {
+        QApplication::processEvents();
+        adjustSize();
+    }
+}
+
 void MainWidget::onToolChanged() {
     for( int i = 0; i < ui->layoutTools->count(); ++i ) {
         if( QPushButton* btn = dynamic_cast< QPushButton* >( ui->layoutTools->itemAt( i )->widget() ) ) {
@@ -157,11 +174,13 @@ void MainWidget::onLoad() {
         QMessageBox::warning( this, "Error", QString( "Failed to load file '%1'" ).arg( fileName ) );
     }
 
+    m_loading = true;
+    ui->sliderWidth->setValue( m_model.getWidth() );
+    ui->sliderHeight->setValue( m_model.getHeight() );
+    m_loading = false;
+    onMapResize();
+
     resetAIs();
-    m_view->setSize(
-        modelPointsToPixels( AIModel::blocksToPoints( m_model.getWidth() ) ),
-        modelPointsToPixels( AIModel::blocksToPoints( m_model.getHeight() ) )
-    );
 }
 
 void MainWidget::onSave() {
@@ -185,9 +204,7 @@ AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
     setActiveItem( WALL );
     setCursor( Qt::CrossCursor );
 
-    m_width = modelPointsToPixels( AIModel::blocksToPoints( m_model->getWidth() ) );
-    m_height = modelPointsToPixels( AIModel::blocksToPoints( m_model->getHeight() ) );
-    setMinimumSize( m_width, m_height );
+    refreshSize();
 
     connect( &m_timer, SIGNAL( timeout() ), SLOT( onTimeOut() ) );
     start();
@@ -200,9 +217,9 @@ void AISimulatorView::setActiveItem( AISimulatorView::ActiveItem item ) {
     m_item = item;
 }
 
-void AISimulatorView::setSize( int width, int height ) {
-    m_width = width;
-    m_height = height;
+void AISimulatorView::refreshSize() {
+    m_width = modelPointsToPixels( AIModel::blocksToPoints( m_model->getWidth() ) );
+    m_height = modelPointsToPixels( AIModel::blocksToPoints( m_model->getHeight() ) );
     setMinimumSize( m_width, m_height );
 }
 

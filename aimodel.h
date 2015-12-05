@@ -26,6 +26,12 @@ public:
     static const int DEFAULT_WIDTH = 15;
     static const int DEFAULT_HEIGHT = 15;
 
+    static const int MIN_WIDTH = 5;
+    static const int MIN_HEIGHT = 5;
+
+    static const int MAX_WIDTH = 75;
+    static const int MAX_HEIGHT = 30;
+
     static const int DEATH_RADIUS = 0;
     static const int EXTREME_DANGER_RADIUS = 1;
     static const int WARNING_RADIUS = 2;
@@ -42,6 +48,8 @@ public:
 
     int getWidth() const;
     int getHeight() const;
+
+    void resize( int width, int height );
 
     bool save( const QString& fileName ) const;
     bool load( const QString& fileName );
