@@ -7,6 +7,7 @@
 #include <QMouseEvent>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QShortcut>
 
 #include "botai.h"
 #include "collisionresolver.h"
@@ -69,6 +70,11 @@ MainWidget::MainWidget( QWidget* parent ) :
             connect( btn, SIGNAL( clicked() ), SLOT( onToolChanged() ) );
         }
     }
+
+    connect( new QShortcut( QKeySequence( Qt::Key_W ), this ), SIGNAL( activated() ), ui->bnWall, SLOT( click() ) );
+    connect( new QShortcut( QKeySequence( Qt::Key_A ), this ), SIGNAL( activated() ), ui->bnAttackBot, SLOT( click() ) );
+    connect( new QShortcut( QKeySequence( Qt::Key_D ), this ), SIGNAL( activated() ), ui->bnDefenseBot, SLOT( click() ) );
+    connect( new QShortcut( QKeySequence( Qt::Key_X ), this ), SIGNAL( activated() ), ui->bnKill, SLOT( click() ) );
 }
 
 MainWidget::~MainWidget() {
