@@ -419,6 +419,25 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>sliderWidth</tabstop>
+  <tabstop>spinBox</tabstop>
+  <tabstop>sliderHeight</tabstop>
+  <tabstop>spinBox_2</tabstop>
+  <tabstop>bnWall</tabstop>
+  <tabstop>bnAttackBot</tabstop>
+  <tabstop>bnDefenseBot</tabstop>
+  <tabstop>bnKill</tabstop>
+  <tabstop>bnStart</tabstop>
+  <tabstop>bnPause</tabstop>
+  <tabstop>cmbSpeed</tabstop>
+  <tabstop>bnSave</tabstop>
+  <tabstop>bnLoad</tabstop>
+  <tabstop>btnReset</tabstop>
+  <tabstop>bnKillBots</tabstop>
+  <tabstop>cmbAttackBotAI</tabstop>
+  <tabstop>cmbDefenseBotAI</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
