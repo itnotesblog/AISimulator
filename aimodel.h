@@ -62,8 +62,10 @@ public:
     bool remove( int x, int y );
     bool kill( int x, int y );
 
-    bool addBot( int x, int y, int type = 2 );
+    std::shared_ptr<Bot> addBot( int x, int y, int type = 2 );
     bool addBot( const std::shared_ptr< Bot >& bot );
+
+    std::shared_ptr< Bot > findBot( int x, int y ) const;
 
     void reset( int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT );
     void killBots();

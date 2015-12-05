@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QShortcut>
+#include <QToolTip>
 
 #include "botai.h"
 #include "collisionresolver.h"
@@ -50,7 +51,7 @@ MainWidget::MainWidget( QWidget* parent ) :
     m_toolItemMap[ ui->bnDefenseBot ] = AISimulatorView::DEFENSE_BOT;
     m_toolItemMap[ ui->bnKill ] = AISimulatorView::KILL;
 
-    for( QComboBox* cmb : m_cmbMap ) {
+    for( QComboBox * cmb : m_cmbMap ) {
         connect( cmb, SIGNAL( currentIndexChanged( int ) ), SLOT( onAIChanged( int ) ) );
     }
 
@@ -214,6 +215,12 @@ AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
 
     connect( &m_timer, SIGNAL( timeout() ), SLOT( onTimeOut() ) );
     start();
+
+    m_lblToast = new QLabel( this );
+    m_lblToast->setStyleSheet( "background: rgba( 255, 255, 255, 230 ); border: 1px solid gray; font-family: monospace;" );
+    m_lblToast->hide();
+
+    connect( new QShortcut( QKeySequence( Qt::Key_Escape ), this ), SIGNAL( activated() ), SLOT( onHideBotInfo() ) );
 }
 
 AISimulatorView::~AISimulatorView() {
@@ -300,6 +307,86 @@ void AISimulatorView::paintEvent( QPaintEvent* ) {
     for( auto b : m_model->getBots() ) {
         drawBlock( b->getX(), b->getY(), b->getSize(), b->getType(), &painter );
     }
+
+    if( m_markedBot ) {
+        if( m_markedBot->isDead() || m_model->getBots().isEmpty() ) {
+            m_markedBot.reset();
+            m_lblToast->hide();
+            return;
+        }
+
+        const int xPixels = modelPointsToPixels( m_markedBot->getX() );
+        const int yPixels = modelPointsToPixels( m_markedBot->getY() );
+
+        QString directionStr;
+        switch( m_markedBot->getDirection() ) {
+        case Bot::LEFT:
+            directionStr = "&larr;";
+            break;
+        case Bot::RIGHT:
+            directionStr = "&rarr;";
+            break;
+        case Bot::UP:
+            directionStr = "&uarr;";
+            break;
+        case Bot::DOWN:
+            directionStr = "&darr;";
+            break;
+        default:
+            break;
+        }
+        if( !m_markedBot->isMoving() ) {
+            directionStr = "&otimes;";
+        }
+
+        m_lblToast->setText(
+            QString(
+                "<table width='100%'>"
+                "   <tr>"
+                "       <td valign='bottom'>id: <strong>%1</strong></td>"
+                "       <td align='right'><font size='5'><strong>%2<strong></font></td>"
+                "   </tr>"
+                "</table><hr>"
+                "<table width='100%'>"
+                "   <tr>"
+                "       <td><strong>%3</strong></td>"
+                "       <td>x</td>"
+                "       <td><strong>%4</strong</td>"
+                "       <td align='right'>points<td>"
+                "   </tr>"
+                "   <tr>"
+                "       <td><strong>%5</strong></td>"
+                "       <td>x</td>"
+                "       <td><strong>%6</strong</td>"
+                "       <td align='right'>pixels<td>"
+                "   </tr>"
+                "</table>"
+            ).arg( m_markedBot->getID() ).arg( directionStr ).arg( m_markedBot->getX() ).arg( m_markedBot->getY() ).arg( xPixels ).arg( yPixels )
+        );
+
+        int toastX = xPixels;
+        int toastY = yPixels;
+
+        if( m_width < toastX + m_lblToast->width() ) {
+            toastX -= m_lblToast->width();
+        }
+
+        if( m_height < toastY + m_lblToast->height() ) {
+            toastY -= m_lblToast->height();
+        }
+
+        m_lblToast->move( toastX, toastY );
+
+        if( m_prevMarkedBot == m_markedBot ) {
+            return;
+        }
+
+        m_lblToast->show();
+
+        m_prevMarkedBot = m_markedBot;
+    } else {
+        m_lblToast->hide();
+    }
 }
 
 void AISimulatorView::drawBlock( int xPoints, int yPoints, int sizePoints, int type, QPainter* painter ) {
@@ -333,6 +420,12 @@ void AISimulatorView::onTimeOut() {
     repaint();
 }
 
+void AISimulatorView::onHideBotInfo() {
+    m_markedBot.reset();
+    m_prevMarkedBot.reset();
+    m_lblToast->hide();
+}
+
 void AISimulatorView::mousePressEvent( QMouseEvent* e ) {
     m_pressedLeft = e->button() == Qt::LeftButton;
     m_pressedRight = e->button() == Qt::RightButton;
@@ -356,6 +449,18 @@ void AISimulatorView::onMouseEvent( QMouseEvent* e ) {
     int xBlocks = e->pos().x() / PIXELS_IN_MODEL_POINT / AIModel::BLOCK_SIZE;
     int yBlocks = e->pos().y() / PIXELS_IN_MODEL_POINT / AIModel::BLOCK_SIZE;
 
+    if( e->button() == Qt::MiddleButton ) {
+        if( auto b = m_model->findBot( xBlocks, yBlocks ) ) {
+            if( m_markedBot == b ) {
+                m_markedBot.reset();
+                m_prevMarkedBot.reset();
+            } else {
+                m_markedBot = b;
+            }
+            return;
+        }
+    }
+
     int xPoints = AIModel::blocksToPoints( xBlocks ) + AIModel::HALF_BLOCK_SIZE;
     int yPoints = AIModel::blocksToPoints( yBlocks ) + AIModel::HALF_BLOCK_SIZE;
 
@@ -369,10 +474,14 @@ void AISimulatorView::onMouseEvent( QMouseEvent* e ) {
         m_model->addWall( xBlocks, yBlocks );
         break;
     case ATTACK_BOT:
-        m_model->addBot( xPoints, yPoints, 2 );
+        if( auto b = m_model->addBot( xPoints, yPoints, 2 ) ) {
+            m_markedBot = b;
+        }
         break;
     case DEFENSE_BOT:
-        m_model->addBot( xPoints, yPoints, 3 );
+        if( auto b = m_model->addBot( xPoints, yPoints, 3 ) ) {
+            m_markedBot = b;
+        }
         break;
     case KILL:
         m_model->kill( xBlocks, yBlocks );

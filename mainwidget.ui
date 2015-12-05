@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>380</width>
-    <height>455</height>
+    <height>398</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,12 +20,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="10" column="1">
-    <widget class="QComboBox" name="cmbAttackBotAI"/>
-   </item>
-   <item row="0" column="0" rowspan="3" colspan="2">
-    <layout class="QVBoxLayout" name="viewLayout"/>
-   </item>
    <item row="5" column="0" colspan="2">
     <layout class="QHBoxLayout" name="layoutTools">
      <item>
@@ -174,6 +168,12 @@
      </property>
     </widget>
    </item>
+   <item row="10" column="1">
+    <widget class="QComboBox" name="cmbAttackBotAI"/>
+   </item>
+   <item row="0" column="0" rowspan="3" colspan="2">
+    <layout class="QVBoxLayout" name="viewLayout"/>
+   </item>
    <item row="8" column="0" colspan="2">
     <widget class="Line" name="line_2">
      <property name="orientation">
@@ -235,6 +235,13 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <widget class="Line" name="line_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
    <item row="6" column="0" colspan="2">
     <widget class="Line" name="line">
@@ -409,13 +416,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="Line" name="line_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

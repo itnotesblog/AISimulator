@@ -157,8 +157,13 @@ bool AIModel::kill( int x, int y ) {
     return true;
 }
 
-bool AIModel::addBot( int x, int y, int type ) {
-    return addBot( makeBot( x, y, type ) );
+std::shared_ptr< Bot > AIModel::addBot( int x, int y, int type ) {
+    auto bot = makeBot( x, y, type );
+    if( addBot( bot ) ) {
+        return bot;
+    }
+
+    return nullptr;
 }
 
 bool AIModel::addBot( const std::shared_ptr< Bot >& bot ) {
@@ -171,6 +176,16 @@ bool AIModel::addBot( const std::shared_ptr< Bot >& bot ) {
     refreshDangerMap();
 
     return true;
+}
+
+std::shared_ptr< Bot > AIModel::findBot( int x, int y ) const {
+    for( auto b : m_bots ) {
+        if( b->getX() / BLOCK_SIZE == x && b->getY() / BLOCK_SIZE == y ) {
+            return b;
+        }
+    }
+
+    return nullptr;
 }
 
 void AIModel::reset( int width, int height ) {

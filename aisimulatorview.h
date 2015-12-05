@@ -8,6 +8,7 @@
 
 class QComboBox;
 class QPushButton;
+class QLabel;
 
 class AISimulatorView;
 
@@ -93,6 +94,7 @@ protected:
 
 private slots:
     void onTimeOut();
+    void onHideBotInfo();
 
 private:
     AIModel* m_model;
@@ -107,6 +109,11 @@ private:
     ActiveItem m_item;
 
     bool m_paused;
+
+    std::shared_ptr< Bot > m_markedBot;
+    std::shared_ptr< Bot > m_prevMarkedBot;
+
+    QLabel* m_lblToast;
 
 };
 
