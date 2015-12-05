@@ -25,6 +25,7 @@ public:
     void registerAI( const QString& name, const std::set< int >& botTypes, BotAI* ai );
 
 private slots:
+    void onStartPause();
     void onReset();
     void resetAIs();
     void onKillBots();
@@ -72,6 +73,9 @@ public:
 
     void setSize( int width, int height );
 
+    void start( double xSpeed = 1.0 );
+    void pause();
+
 protected:
     void paintEvent( QPaintEvent* );
     static void drawBlock( int xPoints, int yPoints, int sizePoints, int type, QPainter* painter );
@@ -97,6 +101,8 @@ private:
     bool m_pressedLeft;
     bool m_pressedRight;
     ActiveItem m_item;
+
+    bool m_paused;
 
 };
 

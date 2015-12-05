@@ -33,6 +33,8 @@ MainWidget::MainWidget( QWidget* parent ) :
     QWidget( parent ), ui( new Ui::MainWidget ), m_view( new AISimulatorView( &m_model ) ) {
     ui->setupUi( this );
 
+    setWindowTitle( "AISimulator" );
+
     ui->viewLayout->addWidget( m_view );
     connect( ui->bnSave, SIGNAL( clicked() ), SLOT( onSave() ) );
     connect( ui->bnLoad, SIGNAL( clicked() ), SLOT( onLoad() ) );
@@ -50,6 +52,12 @@ MainWidget::MainWidget( QWidget* parent ) :
     for( QComboBox* cmb : m_cmbMap ) {
         connect( cmb, SIGNAL( currentIndexChanged( int ) ), SLOT( onAIChanged( int ) ) );
     }
+
+    connect( ui->bnStart, SIGNAL( clicked() ), SLOT( onStartPause() ) );
+    connect( ui->bnPause, SIGNAL( clicked() ), SLOT( onStartPause() ) );
+    connect( ui->cmbSpeed, SIGNAL( currentIndexChanged( int ) ), SLOT( onStartPause() ) );
+
+    ui->cmbSpeed->setCurrentIndex( 2 );
 
     m_model.setCollisionResolver( std::make_shared< CollisionResolver >() );
 
@@ -91,6 +99,19 @@ void MainWidget::registerAI( const QString& name, const std::set< int >& botType
                 onAIChanged( type, 0 );
             }
         }
+    }
+}
+
+void MainWidget::onStartPause() {
+    if( QPushButton* b = dynamic_cast< QPushButton* >( sender() ) ) {
+        ui->bnStart->setChecked( b == ui->bnStart );
+        ui->bnPause->setChecked( b == ui->bnPause );
+    }
+
+    if( ui->bnStart->isChecked() ) {
+        m_view->start( ui->cmbSpeed->currentText().mid( 1 ).toDouble() );
+    } else {
+        m_view->pause();
     }
 }
 
@@ -160,7 +181,7 @@ void MainWidget::onSave() {
 
 // ********************************************************************************
 AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
-    QWidget( parent ), m_model( model ), m_pressedLeft( false ), m_pressedRight( false ) {
+    QWidget( parent ), m_model( model ), m_pressedLeft( false ), m_pressedRight( false ), m_paused( false ) {
     setActiveItem( WALL );
     setCursor( Qt::CrossCursor );
 
@@ -169,7 +190,7 @@ AISimulatorView::AISimulatorView( AIModel* model, QWidget* parent ) :
     setMinimumSize( m_width, m_height );
 
     connect( &m_timer, SIGNAL( timeout() ), SLOT( onTimeOut() ) );
-    m_timer.start( STEP_TIME_INTERVAL );
+    start();
 }
 
 AISimulatorView::~AISimulatorView() {
@@ -183,6 +204,15 @@ void AISimulatorView::setSize( int width, int height ) {
     m_width = width;
     m_height = height;
     setMinimumSize( m_width, m_height );
+}
+
+void AISimulatorView::start( double xSpeed ) {
+    m_paused = false;
+    m_timer.start( STEP_TIME_INTERVAL / xSpeed );
+}
+
+void AISimulatorView::pause() {
+    m_paused = true;
 }
 
 QColor colorForDangerLevel( int level ) {
@@ -273,7 +303,10 @@ void AISimulatorView::drawBlock( int xPoints, int yPoints, int sizePoints, const
 }
 
 void AISimulatorView::onTimeOut() {
-    m_model->doStep();
+    if( !m_paused ) {
+        m_model->doStep();
+    }
+
     repaint();
 }
 

@@ -130,6 +130,9 @@ bool AIModel::kill( int x, int y ) {
         }
     }
 
+    cleanDeadBots();
+    refreshDangerMap();
+
     return true;
 }
 
@@ -143,6 +146,9 @@ bool AIModel::addBot( const std::shared_ptr< Bot >& bot ) {
     }
 
     m_bots.insertMulti( bot->getType(), bot );
+
+    refreshDangerMap();
+
     return true;
 }
 
@@ -159,6 +165,7 @@ void AIModel::reset( int width, int height ) {
 
 void AIModel::killBots() {
     m_bots.clear();
+    refreshDangerMap();
 }
 
 std::shared_ptr< Bot > AIModel::makeBot( int x, int y, int type ) {
@@ -190,14 +197,17 @@ void AIModel::doStep() {
                 }
             }
         }
+        cleanDeadBots();
+    }
+}
 
-        auto it = m_bots.begin();
-        while( it != m_bots.end() ) {
-            if( it.value()->isDead() ) {
-                it = m_bots.erase( it );
-            } else {
-                ++it;
-            }
+void AIModel::cleanDeadBots() {
+    auto it = m_bots.begin();
+    while( it != m_bots.end() ) {
+        if( it.value()->isDead() ) {
+            it = m_bots.erase( it );
+        } else {
+            ++it;
         }
     }
 }

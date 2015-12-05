@@ -60,6 +60,7 @@ public:
     void reset( int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT );
     void killBots();
     void doStep();
+    void cleanDeadBots();
 
     Bot doMove( const Bot& bot ) const;
 
